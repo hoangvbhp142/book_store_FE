@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import categoryApi from '../api/categoryApi';
-import { handleApiError, buildTree } from '../app/utils';
+import { handleApiError, buildTree, addNodeToTree } from '../app/utils';
 
 export const getAll = createAsyncThunk('category/gatAll', async (_, { rejectWithValue }) => {
     try {
@@ -50,24 +50,38 @@ const categorySlice = createSlice({
         builder
             .addCase(getAll.fulfilled, (state, action) => {
                 const { data, meta } = action.payload;
+                console.log('raw', data);
                 state.categories = buildTree(data);
+                console.log('processed', buildTree(data));
+
                 state.loading = false;
             })
             .addCase(create.fulfilled, (state, action) => {
 
                 const data = action.payload;
                 console.log(data);
-                
-                console.log(state.categories);
-                
+                const temp = JSON.parse(JSON.stringify(state.categories));
+
+                const parentCategory = state.categories.find(cat => cat._id === data.parentId);
+
                 const newCategory = {
                     ...data,
                     children: [],
-                    parentName: data.parentId && state.categories[data.parentId] ? data.parentId : ''
+                    parentName: parentCategory ? parentCategory.name : '',
                 }
 
-                state.categories[data.parentId].push(newCategory);
-                console.log(newCategory);
+                if (data.parentId !== null) {
+                    const added = addNodeToTree(temp, newCategory);
+                    if (!added) {
+                        temp.push(newCategory);
+                    }
+                }
+                else {
+                    temp.push(newCategory);
+                }
+
+                console.log('hello', temp);
+                state.categories = temp;
                 state.loading = false;
             })
             .addCase(update.fulfilled, (state, action) => {

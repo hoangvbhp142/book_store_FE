@@ -42,11 +42,31 @@ const buildTree = (tree) => {
     return roots;
 }
 
+const addNodeToTree = (tree, parentId, newNode) => {
+    for (const node of tree) {
+        if (node._id === parentId) {
+            node.children = node.children || [];
+            node.children.push(newNode);
+            return true;
+        }
+        else {
+            if (node.children?.length) {
+                const added = addNodeToTree(tree, newNode);
+                if (added) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
 const utils = {
     formatCurrency,
     handleApiError,
-    buildTree
+    buildTree,
+    addNodeToTree
 }
 
-export { formatCurrency, handleApiError, buildTree }
+export { formatCurrency, handleApiError, buildTree, addNodeToTree }
 export default utils;
