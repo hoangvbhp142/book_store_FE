@@ -2,10 +2,11 @@
 const Modal = ({ isOpen, onClose, children, title }) => {
     if (!isOpen) return null;
     return (
-        <div className="fixed inset-0 bg-gray-600/30 flex items-center justify-center z-50 p-4"> {/* Đổi thành bg-gray-600/30: Xám mờ 30% thay vì đen 50% */}
-            <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div className="fixed inset-0 bg-gray-600/30 flex items-center justify-center z-50 p-4">
+            {/* Tăng max-width từ max-w-lg (32rem) lên max-w-4xl (56rem) hoặc max-w-5xl (64rem) */}
+            <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
                 {/* Header */}
-                <div className="flex justify-between items-center px-5 py-3 border-b border-gray-200">
+                <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200">
                     <h2 className="text-xl font-bold text-gray-900">{title}</h2>
                     <button
                         onClick={onClose}

@@ -6,6 +6,7 @@ import cartReducer from '../stores/cartSlice';
 import addressReducer from '../stores/addressSlice';
 import categoryReducer from '../stores/categorySlice';
 import authorReducer from '../stores/authorSlice';
+import publisherReducer from '../stores/publisherSlice';
 
 const store = configureStore({
     reducer: {
@@ -16,6 +17,7 @@ const store = configureStore({
         address: addressReducer,
         category: categoryReducer,
         author: authorReducer,
+        publisher: publisherReducer,
     },
 });
 

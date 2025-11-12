@@ -43,6 +43,7 @@ import AboutPage from './pages/AboutPage'
 import ContactPage from './pages/ContactPage'
 import AdminCategoryTree from './components/AdminCategoryTree'
 import AuthorManagementPage from './pages/admin/AuthorManagementPage'
+import PublisherManagementPage from './pages/admin/PublisherManagementPage'
 
 function App() {
   return (
@@ -87,6 +88,7 @@ function App() {
               <Route path='/admin/books/' element={<AdminBooksPage />} />
               <Route path='/admin/categories/' element={<AdminCategoriesPage />} />
               <Route path='/admin/authors/' element={<AuthorManagementPage />} />
+              <Route path='/admin/publishers/' element={<PublisherManagementPage />} />
               <Route path='/admin/users/' element={<AdminUsersPage />} />
               <Route path='/admin/add-new-book/' element={<AddBookPage />} />
               <Route path='/admin/books/:id/edit/' element={<UpdateBookPage book={null} />} />
