@@ -2,9 +2,9 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import categoryApi from '../api/categoryApi';
 import { handleApiError, buildTree, addNodeToTree } from '../app/utils';
 
-export const getAll = createAsyncThunk('category/gatAll', async (_, { rejectWithValue }) => {
+export const getAll = createAsyncThunk('category/gatAll', async (params = {}, { rejectWithValue }) => {
     try {
-        return await categoryApi.getAll();
+        return await categoryApi.getAll(params);
     } catch (error) {
         return handleApiError(error, rejectWithValue);
     }

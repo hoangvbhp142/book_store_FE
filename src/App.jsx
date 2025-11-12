@@ -42,6 +42,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import AboutPage from './pages/AboutPage'
 import ContactPage from './pages/ContactPage'
 import AdminCategoryTree from './components/AdminCategoryTree'
+import AuthorManagementPage from './pages/admin/AuthorManagementPage'
 
 function App() {
   return (
@@ -85,6 +86,7 @@ function App() {
               <Route path='/admin/rentals/' element={<AdminRentalsPage />} />
               <Route path='/admin/books/' element={<AdminBooksPage />} />
               <Route path='/admin/categories/' element={<AdminCategoriesPage />} />
+              <Route path='/admin/authors/' element={<AuthorManagementPage />} />
               <Route path='/admin/users/' element={<AdminUsersPage />} />
               <Route path='/admin/add-new-book/' element={<AddBookPage />} />
               <Route path='/admin/books/:id/edit/' element={<UpdateBookPage book={null} />} />

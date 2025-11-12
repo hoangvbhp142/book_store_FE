@@ -76,21 +76,13 @@ const AdminCategoriesPage = () => {
         closeModal();
     };
 
-    const onEdit = () => {
-        return;
-    };
-
     const onDelete = () => {
-        return;
-    };
 
-    const onAddChild = () => {
-        return;
-    };
+    }
 
     // API calls
     const fetchCategory = async () => {
-        dispatch(getAll({ filter: {} }));
+        dispatch(getAll({ filter: {}, limit: 10000 }));
     };
 
     // Effects

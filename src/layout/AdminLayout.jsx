@@ -17,9 +17,8 @@ const AdminLayout = () => {
     <div className="flex h-screen bg-gray-100">
       <AdminSidebar />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <AdminHeader />
-        <main className="flex-1 overflow-y-auto p-3">
+      <div className="flex-1 flex flex-col overflow-hidden px-1">
+        <main className="flex-1 overflow-y-auto">
           <Outlet />
         </main>
       </div>
