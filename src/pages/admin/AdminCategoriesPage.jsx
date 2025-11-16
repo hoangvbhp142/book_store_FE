@@ -5,6 +5,7 @@ import Modal from '../../modal/Modal';
 import AddCategoryForm from '../../modal/AddCategoryForm';
 import AdminCategoryTree from '../../components/AdminCategoryTree';
 import { toast } from 'react-toastify';
+import { buildTree } from '../../app/utils';
 
 const AdminCategoriesPage = () => {
     // Redux hooks
@@ -108,7 +109,7 @@ const AdminCategoriesPage = () => {
 
                     <div className="bg-white rounded-lg border border-gray-300 shadow-sm overflow-hidden">
                         <AdminCategoryTree
-                            categories={categories}
+                            categories={buildTree(categories)}
                             onEdit={(node) => openEditModal(node)}
                             onDelete={onDelete}
                             onAddChild={(node) => openAddModal(node)}

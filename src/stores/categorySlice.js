@@ -50,38 +50,12 @@ const categorySlice = createSlice({
         builder
             .addCase(getAll.fulfilled, (state, action) => {
                 const { data, meta } = action.payload;
-                console.log('raw', data);
-                state.categories = buildTree(data);
-                console.log('processed', buildTree(data));
-
+                state.categories = data;
                 state.loading = false;
             })
             .addCase(create.fulfilled, (state, action) => {
-
                 const data = action.payload;
-                console.log(data);
-                const temp = JSON.parse(JSON.stringify(state.categories));
-
-                const parentCategory = state.categories.find(cat => cat._id === data.parentId);
-
-                const newCategory = {
-                    ...data,
-                    children: [],
-                    parentName: parentCategory ? parentCategory.name : '',
-                }
-
-                if (data.parentId !== null) {
-                    const added = addNodeToTree(temp, newCategory);
-                    if (!added) {
-                        temp.push(newCategory);
-                    }
-                }
-                else {
-                    temp.push(newCategory);
-                }
-
-                console.log('hello', temp);
-                state.categories = temp;
+                state.categories.push(data);
                 state.loading = false;
             })
             .addCase(update.fulfilled, (state, action) => {
