@@ -6,6 +6,7 @@ import PagingBar from '../../components/PagingBar';
 import { useDispatch, useSelector } from 'react-redux';
 import { create, getAll, remove, update } from '../../stores/publisherSlice';
 import { toast } from 'react-toastify';
+import { useSearchParams } from 'react-router-dom';
 
 const PublisherManagementPage = () => {
     const dispatch = useDispatch();
@@ -20,6 +21,42 @@ const PublisherManagementPage = () => {
     const [searchKeyword, setSearchKeyword] = useState('');
     const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
     const [currentPage, setCurrentPage] = useState(1);
+
+
+
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [params, setParams] = useState({
+        sort: searchParams.get("sort") || "name:asc",
+        q: searchParams.get("q") || "",
+        limit: Number(searchParams.get("limit") || 10),
+        page: Number(searchParams.get("page") || 1),
+        filter: {}
+    });
+
+    // ==========EVENT HANDLER ==========
+    const updateParams = (patch) => {
+        const next = {
+            ...params,
+            ...patch,
+            filter: {
+                ...params.filter,
+                ...(patch.filter || {})
+            }
+        };
+        setParams(next);
+
+        // Đồng bộ lên URL
+        const toSet = {
+            ...(next.sort ? { sort: next.sort } : {}),
+            ...(next.q ? { q: next.q } : {}),
+            ...(next.page !== 0 ? { page: next.page } : {}),
+            ...(next.limit !== 0 ? { limit: next.limit } : {})
+        };
+
+        console.log(toSet);
+
+        setSearchParams(toSet);
+    };
 
     const openAddModal = () => {
         setModalData({
@@ -80,25 +117,13 @@ const PublisherManagementPage = () => {
     };
 
     const fetchPublishers = () => {
-
-        const params = {
-            sort: `${sortConfig.key}:${sortConfig.direction}`,
-            q: searchKeyword,
-            filter: {},
-            limit: 10,
-            page: currentPage || 1
-        }
-
+        console.log(params);
         dispatch(getAll(params));
     }
 
     useEffect(() => {
         fetchPublishers();
-    }, [currentPage, searchKeyword, sortConfig]);
-
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [searchKeyword, sortConfig]);
+    }, [params]);
 
     return (
         <div className="container mx-auto p-4 max-w-6xl bg-white">
@@ -118,8 +143,8 @@ const PublisherManagementPage = () => {
                         <input
                             type="text"
                             placeholder="Tìm kiếm theo tên, email, website..."
-                            value={searchKeyword}
-                            onChange={(e) => setSearchKeyword(e.target.value)}
+                            value={params.q}
+                            onChange={(e) => updateParams({ q: e.target.value })}
                             className="w-full px-4 py-2 pl-10 pr-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -132,25 +157,27 @@ const PublisherManagementPage = () => {
 
                 <div className="flex space-x-2">
                     <select
-                        value={sortConfig.key}
-                        onChange={(e) => setSortConfig({ ...sortConfig, key: e.target.value })}
+                        value={params.sort}
+                        onChange={(e) => updateParams({ sort: e.target.value })}
                         className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                        <option value="name">Sắp xếp theo tên</option>
-                        <option value="contactEmail">Sắp xếp theo email</option>
-                        <option value="website">Sắp xếp theo website</option>
-                        <option value="address">Sắp xếp theo địa chỉ</option>
+                        <option value="name:asc">Sắp xếp theo tên A-Z</option>
+                        <option value="name:desc">Sắp xếp theo tên Z-A</option>
+
+                        <option value="contactEmail:asc">Sắp xếp theo email A-Z</option>
+                        <option value="contactEmail:desc">Sắp xếp theo email Z-A</option>
+
+                        <option value="website:asc">Sắp xếp theo website A-Z</option>
+                        <option value="website:desc">Sắp xếp theo website Z-A</option>
+
+                        <option value="address:asc">Sắp xếp theo địa chỉ A-Z</option>
+                        <option value="address:desc">Sắp xếp theo địa chỉ Z-A</option>
+
                     </select>
-                    <button
-                        onClick={() => setSortConfig({ ...sortConfig, direction: sortConfig.direction === 'asc' ? 'desc' : 'asc' })}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                        {sortConfig.direction === 'asc' ? 'A-Z' : 'Z-A'}
-                    </button>
                 </div>
             </div>
 
-            <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">
+            <div className="overflow-x-auto w-full shadow-lg rounded-lg border border-gray-200">
                 <table className="w-full divide-y divide-gray-200 bg-white">
                     <thead className="bg-gray-50">
                         <tr>
@@ -159,62 +186,68 @@ const PublisherManagementPage = () => {
                             </th>
                             <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Địa chỉ
-                            </th> {/* Thêm cột địa chỉ */}
+                            </th>
                             <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Website
-                            </th> {/* Thêm cột website */}
+                            </th>
                             <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Email liên hệ
-                            </th> {/* Thêm cột email */}
+                            </th>
                             <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Hành động
                             </th>
                         </tr>
                     </thead>
+
                     <tbody className="bg-white divide-y divide-gray-200">
-                        {publishers.length === 0 ? ( // Đổi thành publishers
+                        {publishers.length === 0 ? (
                             <tr>
-                                <td colSpan="5" className="px-6 py-16 text-center text-gray-500 text-lg"> {/* Đổi colSpan */}
-                                    Chưa có nhà xuất bản nào. Hãy thêm nhà xuất bản mới! {/* Đổi thông báo */}
+                                <td colSpan="5" className="px-6 py-16 text-center text-gray-500 text-lg">
+                                    Chưa có nhà xuất bản nào. Hãy thêm nhà xuất bản mới!
                                 </td>
                             </tr>
                         ) : (
-                            publishers.map(publisher => ( // Đổi thành publishers
+                            publishers.map(publisher => (
                                 <tr key={publisher.id} className="hover:bg-gray-50 transition duration-150">
-                                    <td className="px-6 py-4 whitespace-nowrap text-base font-semibold text-gray-900">
+
+                                    <td className="px-6 py-4 text-base font-semibold text-gray-900 whitespace-normal break-words">
                                         {publisher.name}
                                     </td>
-                                    <td className="px-6 py-4 text-base text-gray-700 max-w-md" title={publisher.address}>
-                                        <div className="line-clamp-2">
-                                            {publisher.address}
-                                        </div>
+
+                                    <td className="px-6 py-4 text-base text-gray-700 whitespace-normal break-words">
+                                        <div className="line-clamp-2">{publisher.address}</div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-base text-blue-600 hover:text-blue-800">
+
+                                    <td className="px-6 py-4 text-base text-blue-600 hover:text-blue-800 whitespace-normal break-words">
                                         <a href={publisher.website} target="_blank" rel="noopener noreferrer">
                                             {publisher.website}
                                         </a>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-base text-gray-700">
+
+                                    <td className="px-6 py-4 text-base text-gray-700 whitespace-normal break-words">
                                         {publisher.contactEmail}
                                     </td>
-                                    <td className="w-30 px-3 py-4 whitespace-nowrap">
-                                        <div className="flex justify-start space-x-2">
+
+                                    <td className="w-25 px-3 py-4 whitespace-nowrap">
+                                        <div className="flex justify-start space-x-1">
                                             <button
-                                                onClick={() => openEditModal(publisher)} // Đổi tham số
+                                                onClick={() => openEditModal(publisher)}
                                                 className="p-1.5 hover:bg-blue-50 rounded transition duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
                                                 title="Sửa"
                                             >
-                                                <Pencil size={18} className="text-blue-600" />
+                                                <Pencil size={15} className="text-blue-600" />
                                             </button>
+
                                             <button
-                                                onClick={() => handleDeleteClick(publisher)} // Đổi tham số
+                                                onClick={() => handleDeleteClick(publisher)}
                                                 className="p-1.5 hover:bg-red-50 rounded transition duration-150 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
                                                 title="Xóa"
                                             >
-                                                <Trash2 size={18} className="text-red-600" />
+                                                <Trash2 size={15} className="text-red-600" />
                                             </button>
                                         </div>
                                     </td>
+
                                 </tr>
                             ))
                         )}
@@ -232,7 +265,11 @@ const PublisherManagementPage = () => {
             </Modal>
 
             <div className={`mt-2 ${publishers && publishers.length !== 0 ? '' : 'hidden'}`}>
-                <PagingBar currentPage={currentPage} onPageChange={(page) => setCurrentPage(page)} pageSize={meta ? meta.limit : 1} totalPages={meta ? meta.pageCount : 1} />
+                <PagingBar
+                    currentPage={params.page}
+                    onPageChange={(page) => updateParams({ page: page })}
+                    pageSize={meta ? meta.limit : 1}
+                    totalPages={meta ? meta.pageCount : 1} />
             </div>
         </div>
     );

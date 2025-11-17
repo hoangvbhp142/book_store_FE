@@ -60,8 +60,9 @@ const AdminCategoriesPage = () => {
 
         try {
             if (modalData.isEdit) {
-                const result = await dispatch(update(formData.id, data)).unwrap();
+                const result = await dispatch(update({id: formData.id, data})).unwrap();
                 console.log(result);
+                toast.success("Sửa danh mục thành công");
             }
             else {
                 const result = await dispatch(create(data)).unwrap();

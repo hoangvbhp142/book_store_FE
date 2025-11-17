@@ -6,6 +6,7 @@ import PagingBar from '../../components/PagingBar';
 import { useDispatch, useSelector } from 'react-redux';
 import { create, getAll, update } from '../../stores/authorSlice';
 import { toast } from 'react-toastify';
+import { useSearchParams } from 'react-router-dom';
 
 const AuthorManagementPage = () => {
 
@@ -18,9 +19,39 @@ const AuthorManagementPage = () => {
         author: null
     });
 
-    const [searchKeyword, setSearchKeyword] = useState('');
-    const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
-    const [currentPage, setCurrentPage] = useState(1);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [params, setParams] = useState({
+        sort: searchParams.get("sort") || "name:asc",
+        q: searchParams.get("q") || "",
+        limit: Number(searchParams.get("limit") || 10),
+        page: Number(searchParams.get("page") || 1),
+        filter: {}
+    });
+
+    // ==========EVENT HANDLER ==========
+    const updateParams = (patch) => {
+        const next = {
+            ...params,
+            ...patch,
+            filter: {
+                ...params.filter,
+                ...(patch.filter || {})
+            }
+        };
+        setParams(next);
+
+        // Đồng bộ lên URL
+        const toSet = {
+            ...(next.sort ? { sort: next.sort } : {}),
+            ...(next.q ? { q: next.q } : {}),
+            ...(next.page !== 0 ? { page: next.page } : {}),
+            ...(next.limit !== 0 ? { limit: next.limit } : {})
+        };
+
+        console.log(toSet);
+
+        setSearchParams(toSet);
+    };
 
     // Modal handlers
     const openAddModal = () => {
@@ -74,29 +105,14 @@ const AuthorManagementPage = () => {
     };
 
     const fetchAuthors = () => {
-
-        const params = {
-            sort: `${sortConfig.key}:${sortConfig.direction}`,
-            q: searchKeyword,
-            filter: {},
-            limit: 10,
-            page: currentPage || 1
-        }
-
         console.log(params);
-        
 
         dispatch(getAll(params));
     }
 
     useEffect(() => {
         fetchAuthors();
-    }, [currentPage, searchKeyword, sortConfig]);
-
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [searchKeyword, sortConfig]);
-
+    }, [params]);
 
     return (
         <div className="container mx-auto p-4 max-w-6xl bg-white">
@@ -116,8 +132,8 @@ const AuthorManagementPage = () => {
                         <input
                             type="text"
                             placeholder="Tìm kiếm theo tên tác giả"
-                            value={searchKeyword}
-                            onChange={(e) => setSearchKeyword(e.target.value)}
+                            value={params.q}
+                            onChange={(e) => updateParams({ q: e.target.value })}
                             className="w-full px-4 py-2 pl-10 pr-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -130,12 +146,12 @@ const AuthorManagementPage = () => {
 
                 <div className="flex space-x-2">
                     <select
-                        value={sortConfig.direction}
-                        onChange={(e) => setSortConfig({ ...sortConfig, direction: e.target.value })}
+                        value={params.sort}
+                        onChange={(e) => updateParams({ sort: e.target.value })}
                         className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                        <option value="asc">Sắp xếp tên từ A-Z</option>
-                        <option value="desc">Sắp xếp tên từ Z-A</option>
+                        <option value="name:asc">Sắp xếp tên từ A-Z</option>
+                        <option value="name:desc">Sắp xếp tên từ Z-A</option>
                     </select>
                 </div>
             </div>
@@ -208,8 +224,8 @@ const AuthorManagementPage = () => {
 
             <div className='mt-2'>
                 <PagingBar
-                    currentPage={currentPage}
-                    onPageChange={(page) => setCurrentPage(page)}
+                    currentPage={params.page}
+                    onPageChange={(page) => updateParams({ page: page })}
                     pageSize={meta ? meta.limit : 1}
                     totalPages={meta ? meta.pageCount : 1} />
             </div>
