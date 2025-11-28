@@ -1,12 +1,31 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import Hero from '../components/Hero'
 import BookList from '../components/BookList'
 import CategoriesSection from '../components/CategoriesSection'
 import { Link } from 'react-router-dom'
 import books from '../data/Books'
 import { TruckIcon, ShieldCheckIcon, Star, ArrowLeftRightIcon } from 'lucide-react'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchBooks } from '../stores/bookSlice'
 
 const Home = () => {
+
+  const dispatch = useDispatch();
+  const { bookList, loading, error } = useSelector(state => state.books);
+
+  const fetchBookList = () => {
+    const finalParams = {
+      filter: JSON.stringify({ status: "PUBLISHED" })
+    }
+    dispatch(fetchBooks({ params: finalParams, isAdmin: false }));
+  }
+
+  useEffect(() => {
+    fetchBookList();
+  }, []);
+
+  console.log(bookList);
+
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -25,7 +44,7 @@ const Home = () => {
               Xem tất cả →
             </Link>
           </div>
-          <BookList books={books} />
+          <BookList books={bookList} />
         </div>
       </section>
 
@@ -41,7 +60,7 @@ const Home = () => {
               Xem tất cả →
             </Link>
           </div>
-          <BookList books={books} />
+          <BookList books={bookList} />
         </div>
       </section>
 
