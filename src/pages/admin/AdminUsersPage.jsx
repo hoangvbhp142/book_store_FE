@@ -16,6 +16,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { getAll } from '../../stores/userSlice.js';
 import { useCallback, useEffect, useState } from 'react';
+import AdvancedPagingBar from '../../components/AdvancedPagingBar.jsx';
 
 const AdminUsersPage = () => {
 
@@ -340,11 +341,10 @@ const AdminUsersPage = () => {
                             {/* Pagination */}
                             <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
                                 <p className="text-sm text-gray-600">Showing 1-{userList.length} of {userList.length} users</p>
-                                <PagingBar
-                                    currentPage={params.page}
+                                <AdvancedPagingBar
+                                    meta={meta}
                                     onPageChange={(page) => updateParams({ page: page })}
-                                    pageSize={meta ? meta.limit : 1}
-                                    totalPages={meta ? meta.pageCount : 1} />
+                                    onLimitChange={(limit) => updateParams({ limit: limit, page: 1 })} />
                             </div>
                         </div>
                     </div>

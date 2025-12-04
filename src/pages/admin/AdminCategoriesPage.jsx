@@ -20,8 +20,6 @@ const AdminCategoriesPage = () => {
         category: null          // nếu sửa, lưu node cần sửa
     });
 
-
-
     // Modal handlers
     const openAddModal = (parentCategory = null) => {
         setModalData({
@@ -60,7 +58,7 @@ const AdminCategoriesPage = () => {
 
         try {
             if (modalData.isEdit) {
-                const result = await dispatch(update({id: formData.id, data})).unwrap();
+                const result = await dispatch(update({ id: formData.id, data })).unwrap();
                 console.log(result);
                 toast.success("Sửa danh mục thành công");
             }
@@ -84,7 +82,11 @@ const AdminCategoriesPage = () => {
 
     // API calls
     const fetchCategory = async () => {
-        dispatch(getAll({ filter: {}, limit: 10000 }));
+        const params = {
+            filter: {},
+            limit: 10000
+        }
+        dispatch(getAll({params: params, isAdmin: true}));
     };
 
     // Effects

@@ -37,13 +37,18 @@ import PolicyDisplayPage from './pages/PolicyDisplayPage'
 import { RentedBooksPage } from './pages/RentedBooksPage'
 import ProtectedAdminRoutes from './routes/ProtectedAdminRoutes'
 import ProtectedCustomerRoutes from './routes/ProtectedCustomerRoutes'
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AboutPage from './pages/AboutPage'
 import ContactPage from './pages/ContactPage'
-import AdminCategoryTree from './components/AdminCategoryTree'
 import AuthorManagementPage from './pages/admin/AuthorManagementPage'
 import PublisherManagementPage from './pages/admin/PublisherManagementPage'
+import UserEditForm from './pages/admin/UserEditForm'
+import AdminProfile from './pages/admin/AdminProfilePage'
+import VoucherManagementPage from './pages/admin/VoucherManagementPage'
+import ChatBubble from './components/ChatBubble'
+import BannerManagementPage from './pages/admin/BannerManagementPage'
+import AdminOrderDetail from './pages/admin/AdminOrderDetail'
 
 function App() {
   return (
@@ -63,19 +68,21 @@ function App() {
       <Router>
         <LayoutWrapper>
           <Routes>
-            <Route path="/login/" element={<Login mode={"customer"} />} />
+            <Route path="/login" element={<Login mode={"customer"} />} />
             <Route path='/admin/login' element={<Login mode={"admin"} />} />
 
             <Route path='/' element={<Home />} />
-            <Route path='/about/' element={<AboutPage />} />
-            <Route path='/contact/' element={<ContactPage />} />
-            <Route path="/store/" element={<Browser />} />
+            <Route path='/about' element={<AboutPage />} />
+            <Route path='/contact' element={<ContactPage />} />
+            <Route path="/store" element={<Browser />} />
+            <Route path='/search' element={<Browser />} />
+            <Route path='/category/:id' element={<Browser />} />
             <Route path="/book/:id" element={<BookDetail />} />
-            <Route path="/cart/" element={<Cart />} />
-            <Route path='/checkout/' element={<Checkout />} />
-            <Route path='/rent/' element={<RentPage />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path='/checkout' element={<Checkout />} />
+            <Route path='/rent' element={<RentPage />} />
             <Route path='/account/*' element={<Account />} />
-            <Route path="/terms/" element={<PolicyDisplayPage />} />
+            <Route path="/terms" element={<PolicyDisplayPage />} />
 
             <Route path='/admin' element={
               <ProtectedAdminRoutes>
@@ -83,19 +90,24 @@ function App() {
               </ProtectedAdminRoutes>
             } >
               <Route index element={<AdminDashboard />} />
-              <Route path='/admin/orders/' element={<AdminOrdersPage />} />
-              <Route path='/admin/rentals/' element={<AdminRentalsPage />} />
-              <Route path='/admin/books/' element={<AdminBooksPage />} />
-              <Route path='/admin/categories/' element={<AdminCategoriesPage />} />
-              <Route path='/admin/authors/' element={<AuthorManagementPage />} />
-              <Route path='/admin/publishers/' element={<PublisherManagementPage />} />
-              <Route path='/admin/users/' element={<AdminUsersPage />} />
-              <Route path='/admin/add-new-book/' element={<AddBookPage />} />
-              <Route path='/admin/books/:id/edit/' element={<UpdateBookPage book={null} />} />
-              <Route path='/admin/policies/' element={<PolicyPage />} />
-              <Route path='/admin/policies/add/' element={<TextEditor />} />
-              <Route path='/admin/policy/:id/edit/' element={<TextEditor />} />
+              <Route path='/admin/orders' element={<AdminOrdersPage />} />
+              <Route path='/admin/orders/:id' element={<AdminOrderDetail />} />
+              <Route path='/admin/rentals' element={<AdminRentalsPage />} />
+              <Route path='/admin/books' element={<AdminBooksPage />} />
+              <Route path='/admin/categories' element={<AdminCategoriesPage />} />
+              <Route path='/admin/authors' element={<AuthorManagementPage />} />
+              <Route path='/admin/publishers' element={<PublisherManagementPage />} />
+              <Route path='/admin/users' element={<AdminUsersPage />} />
+              <Route path='/admin/users/:id/edit' element={<UserEditForm />} />
+              <Route path='/admin/books/add-new-book' element={<AddBookPage />} />
+              <Route path='/admin/books/:id/edit' element={<UpdateBookPage book={null} />} />
+              <Route path='/admin/policies' element={<PolicyPage />} />
+              <Route path='/admin/policies/add' element={<TextEditor />} />
+              <Route path='/admin/policy/:id/edit' element={<TextEditor />} />
               <Route path='/admin/policy/:id' element={<PolicyDetail />} />
+              <Route path='/admin/profile' element={<AdminProfile />} />
+              <Route path='/admin/vouchers' element={<VoucherManagementPage />} />
+              <Route path='/admin/banners' element={<BannerManagementPage />} />
             </Route>
 
             <Route path='/customer' element={
@@ -125,12 +137,16 @@ function App() {
 function LayoutWrapper({ children }) {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const isCheckoutRoute = location.pathname === '/checkout';
+
+  const isHideLayout = isAdminRoute || isCheckoutRoute;
 
   return (
     <>
-      {!isAdminRoute && <Header />}
+      {!isHideLayout && <Header />}
       {children}
-      {!isAdminRoute && <Footer />}
+      {!isHideLayout && <Footer />}
+      {!isHideLayout && <ChatBubble />}
     </>
   );
 }

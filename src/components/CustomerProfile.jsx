@@ -7,15 +7,19 @@ const CustomerProfile = () => {
     const { user } = useSelector(state => state.auth);
 
     const [formData, setFormData] = useState({
-        email: '',
-        phone: '',
-        fullName: '',
-        role: ''
+        email: "",
+        password: "",
+        fullName: "",
+        phone: "",
+        role: "",
+        isActive: true,
+        photoUrl: "",
+        thumbnailUrl: ""
     });
 
     const handleChange = (e) => {
-        const {name, value} = e.target;
-        setFormData((prev) => ({...prev, [name]: value}));
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
     }
 
     useEffect(() => {
@@ -73,34 +77,19 @@ const CustomerProfile = () => {
                 <h1 className="text-2xl font-bold text-gray-900 mb-6">Hồ sơ cá nhân</h1>
 
                 <form className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                <span>Họ</span>
-                                <span className="text-red-500 ml-1">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                name='fullName'
-                                value={formData.fullName}
-                                onChange={handleChange}
-                                placeholder="Nhập họ"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                <span>Tên</span>
-                                <span className="text-red-500 ml-1">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                name='firstName'
-                                placeholder="Nhập tên"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                        </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <span>Họ và tên</span>
+                            <span className="text-red-500 ml-1">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            name='fullName'
+                            value={formData.fullName}
+                            onChange={handleChange}
+                            placeholder="Nhập họ"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
                     </div>
 
                     <div>
@@ -129,59 +118,6 @@ const CustomerProfile = () => {
                             onChange={handleChange}
                             placeholder="Chưa có email"
                             className="w-full px-3 py-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                    </div>
-
-                    <div className="flex items-center space-x-6">
-                        <label className="block text-sm font-medium text-gray-700">
-                            <span>Giới tính</span>
-                            <span className="text-red-500 ml-1">*</span>
-                        </label>
-                        <label className="flex items-center space-x-2 cursor-pointer">
-                            <input
-                                type="radio"
-                                name="gender"
-                                value="male"
-                                className="w-4 h-4 text-blue-600 focus:ring-blue-500"
-                            />
-                            <span className="text-gray-700">Nam</span>
-                        </label>
-                        <label className="flex items-center space-x-2 cursor-pointer">
-                            <input
-                                type="radio"
-                                name="gender"
-                                value="female"
-                                className="w-4 h-4 text-blue-600 focus:ring-blue-500"
-                            />
-                            <span className="text-gray-700">Nữ</span>
-                        </label>
-                    </div>
-
-                    <div className="flex items-center space-x-3">
-                        <label className="block text-sm font-medium text-gray-700">
-                            <span>Ngày sinh</span>
-                            <span className="text-red-500 ml-1">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            name="day"
-                            placeholder="DD"
-                            maxLength="2"
-                            className="w-16 px-3 py-2 border border-gray-300 rounded-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                        <input
-                            type="text"
-                            name="month"
-                            placeholder="MM"
-                            maxLength="2"
-                            className="w-16 px-3 py-2 border border-gray-300 rounded-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                        <input
-                            type="text"
-                            name="year"
-                            placeholder="YYYY"
-                            maxLength="4"
-                            className="w-20 px-3 py-2 border border-gray-300 rounded-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </div>
 

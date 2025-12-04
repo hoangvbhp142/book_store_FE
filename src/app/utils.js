@@ -14,6 +14,20 @@ const handleApiError = (error, rejectWithValue) => {
     }
     return rejectWithValue(error.message || "Đã xảy ra lỗi không xác định");
 }
+
+//so sanh du lieu truoc va sau khi sua
+const getDiff = (original, current) => {
+    const diff = {};
+
+    Object.keys(current).forEach(key => {
+        if (current[key] !== original[key]) {
+            diff[key] = current[key];
+        }
+    });
+
+    return diff;
+}
+
 //Tao cay
 const buildTree = (tree) => {
     const map = {};
@@ -65,8 +79,9 @@ const utils = {
     formatCurrency,
     handleApiError,
     buildTree,
-    addNodeToTree
+    addNodeToTree,
+    getDiff
 }
 
-export { formatCurrency, handleApiError, buildTree, addNodeToTree }
+export { formatCurrency, handleApiError, buildTree, addNodeToTree, getDiff }
 export default utils;

@@ -1,48 +1,64 @@
-import { Star } from 'lucide-react'
-import sach1 from '../assets/sach1.jpg'
-import utils from '../app/utils'
-const BookCard = ({ book, i }) => {
+import React from 'react';
+import { formatCurrency } from '../app/utils';
+
+const BookCard = ({ book }) => {
+    const {
+        title,
+        description,
+        photoUrl,
+        publisher,
+        bookAuthors,
+        bookCategories,
+        stockQty,
+        sellerPrice,
+        rentPricePerDay,
+        rentPricePerWeek,
+        rentPricePerMonth,
+        publishedAt,
+        page,
+        weight,
+        language,
+        status
+    } = book;
+
+    // Truncate description
+    const truncateDescription = (text, maxLength = 100) => {
+        if (text.length <= maxLength) return text;
+        return text.substring(0, maxLength) + '...';
+    };
+
     return (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-            <div className="aspect-[2/3] bg-gray-100 relative overflow-hidden">
+        <div className="bg-white hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 flex flex-col p-4">
+            {/* Image */}
+            <div className="w-full h-56 sm:h-64 md:h-72 lg:h-64 overflow-hidden">
                 <img
-                    src={book?.image || sach1}
-                    alt={`Book ${i + 1}`}
+                    src={photoUrl.replace('http://minio:9000', 'http://localhost:9000')}
+                    alt={title}
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                 />
-                {i % 3 === 0 && (
-                    <span className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-medium shadow-md">New</span>
-                )}
-                {i % 5 === 0 && (
-                    <span className="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 rounded-full text-xs font-medium shadow-md">Sale</span>
-                )}
             </div>
-            <div className="p-4 space-y-2">
-                <h3 className="font-semibold text-gray-900 text-sm line-clamp-2 hover:text-blue-600 transition-colors duration-200">
-                    The Great Novel
+
+            {/* Content */}
+            <div className="p-3 sm:p-4 flex flex-col flex-1">
+                {/* Title */}
+                <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 line-clamp-1 hover:text-blue-600 transition-colors">
+                    {title}
                 </h3>
-                <p className="text-xs text-gray-600">Author Name</p>
-                <div className="flex items-center gap-1">
-                    <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                    <span className="text-xs font-medium text-gray-900">{(4 + Math.random()).toFixed(1)}</span>
-                    <span className="text-xs text-gray-500">
-                        ({Math.floor(Math.random() * 500 + 50)})
-                    </span>
-                </div>
-                <div className="space-y-1 pt-2">
-                    <div className="flex items-center justify-between">
-                        <span className="font-bold text-gray-900 text-sm">{utils.formatCurrency(book.discountPrice ? book.discountPrice : book.salePrice)}</span>
-                        {book.discountPrice && (
-                            <span className="text-xs text-gray-500 line-through">{utils.formatCurrency(book.salePrice)}</span>
-                        )}
-                    </div>
-                    <div className="text-xs text-green-600 font-medium">
-                        Thuê: {utils.formatCurrency(book.rentalPrice)}/tháng
-                    </div>
-                </div>
+
+                {/* Authors */}
+                <p className="text-xs sm:text-sm text-gray-600 line-clamp-1 mb-2">
+                    {bookAuthors.map((a, i) => a.author.name + (i < bookAuthors.length - 1 ? ', ' : '')).join('')}
+                </p>
+
+                {/* Price */}
+                <span className="text-red-600 font-bold mt-auto text-sm sm:text-base">
+                    {formatCurrency(sellerPrice)}
+                </span>
             </div>
         </div>
-    );
-}
 
-export default BookCard
+
+    );
+};
+
+export default BookCard;

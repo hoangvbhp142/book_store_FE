@@ -1,29 +1,52 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import bookApi from '../api/bookApi';
+import { handleApiError } from '../app/utils';
 
-const fetchBooks = createAsyncThunk("books/fetchBooks", async () => {
-    const response = await bookApi.getAll();
-    return response;
+const fetchBooks = createAsyncThunk("books/fetchBooks", async ({ params, isAdmin = false }, { rejectWithValue }) => {
+    try {
+        const response = await bookApi.getAll(params, isAdmin);        
+        return response;
+    } catch (error) {
+        return handleApiError(error, rejectWithValue);
+    }
 });
 
-const fetchBookById = createAsyncThunk("books/fetchBookById", async (id) => {
-    const response = await bookApi.getById(id);
-    return response;
+const fetchBookById = createAsyncThunk("books/fetchBookById", async ({ id, isAdmin = false }, { rejectWithValue }) => {
+    try {
+        const response = await bookApi.getById(id, isAdmin);
+        console.log(response);
+        
+        return response;
+    } catch (error) {
+        return handleApiError(error, rejectWithValue);
+    }
 });
 
-const createBook = createAsyncThunk("/books/createBook", async (data) => {
-    const response = await bookApi.create(data);
-    return response;
+const createBook = createAsyncThunk("/books/createBook", async (data, { rejectWithValue }) => {
+    try {
+        const response = await bookApi.create(data);
+        return response;
+    } catch (error) {
+        return handleApiError(error, rejectWithValue);
+    }
 });
 
-const updateBook = createAsyncThunk(`/books/updateBook`, async ({ id, data }) => {
-    const response = await bookApi.update(id, data);
-    return response;
+const updateBook = createAsyncThunk(`/books/updateBook`, async ({ id, data }, { rejectWithValue }) => {
+    try {
+        const response = await bookApi.update(id, data);
+        return response;
+    } catch (error) {
+        return handleApiError(error, rejectWithValue)
+    }
 });
 
-const deleteBook = createAsyncThunk(`/books/deleteBook`, async (id) => {
-    const response = await bookApi.delete(id);
-    return response;
+const deleteBook = createAsyncThunk(`/books/deleteBook`, async (id, { rejectWithValue }) => {
+    try {
+        const response = await bookApi.delete(id);
+        return response;
+    } catch (error) {
+        return handleApiError(error, rejectWithValue);
+    }
 });
 
 const bookSlice = createSlice({
@@ -33,6 +56,7 @@ const bookSlice = createSlice({
         selectedBook: null,
         loading: false,
         error: null,
+        meta: null,
     },
     reducers: {
 
@@ -45,8 +69,10 @@ const bookSlice = createSlice({
                 state.error = null;
             })
             .addCase(fetchBooks.fulfilled, (state, action) => {
+                const { data, meta } = action.payload
                 state.loading = false;
-                state.bookList = action.payload;
+                state.bookList = data;
+                state.meta = meta;
             })
             .addCase(fetchBooks.rejected, (state, action) => {
                 state.loading = false;
@@ -60,6 +86,8 @@ const bookSlice = createSlice({
                 state.error = null;
             })
             .addCase(fetchBookById.fulfilled, (state, action) => {
+                console.log(action.payload);
+                
                 state.loading = false;
                 state.selectedBook = action.payload;
             })

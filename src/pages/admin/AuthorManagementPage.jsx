@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { create, getAll, update } from '../../stores/authorSlice';
 import { toast } from 'react-toastify';
 import { useSearchParams } from 'react-router-dom';
+import AdvancedPagingBar from '../../components/AdvancedPagingBar';
 
 const AuthorManagementPage = () => {
 
@@ -223,11 +224,15 @@ const AuthorManagementPage = () => {
             </Modal>
 
             <div className='mt-2'>
-                <PagingBar
+                {/* <PagingBar
                     currentPage={params.page}
                     onPageChange={(page) => updateParams({ page: page })}
                     pageSize={meta ? meta.limit : 1}
-                    totalPages={meta ? meta.pageCount : 1} />
+                    totalPages={meta ? meta.pageCount : 1} /> */}
+                <AdvancedPagingBar
+                    meta={meta}
+                    onPageChange={(page) => updateParams({ page: page })}
+                    onLimitChange={(limit) => updateParams({ limit: limit, page: 1 })} />
             </div>
         </div>
     );

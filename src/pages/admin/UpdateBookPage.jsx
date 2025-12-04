@@ -1,15 +1,9 @@
-import React from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react';
 
 import ModifyBookForm from '../../components/ModifyBookForm'
-import books from '../../data/Books'
 
 const UpdateBookPage = () => {
-    const { id } = useParams();
-    const book = books.find(item => item.id === Number(id));
-
-    console.log(book);
 
     return (
         <main className="flex-1 bg-gray-50/30 min-h-screen">
@@ -25,7 +19,7 @@ const UpdateBookPage = () => {
                         Sửa thông tin sách
                     </h1>
                 </div>
-                <ModifyBookForm isEdit={true} bookData={book} />
+                <ModifyBookForm />
             </div>
         </main>
     )

@@ -1,10 +1,12 @@
 import axiosClient from "./axiosClient";
 
+const endpoint = '/cart';
+
 const cartApi = {
-    getCart: (id) => axiosClient.get(`/carts/user/${id}`),
-    addToCart: (data) => axiosClient.post("/carts", data),
-    updateCartItem: (id, data) => axiosClient.put(`/carts/${id}`, data),
-    removeCartItem: (id) => axiosClient.delete(`/carts/${id}`),
+    getCart: () => axiosClient.get(endpoint),
+    addToCart: (data) => axiosClient.post(endpoint, data),
+    updateCartItem: (id, data) => axiosClient.patch(`${endpoint}/${id}`, data),
+    removeCartItem: (id) => axiosClient.delete(`${endpoint}/${id}`),
 }
 
 export default cartApi;

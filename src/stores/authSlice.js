@@ -60,6 +60,15 @@ export const logout = createAsyncThunk("auth/logout", async (data, { rejectWithV
     }
 });
 
+export const updateProfile = createAsyncThunk("auth/updateProfile", async (data, { rejectWithValue }) => {
+    try {
+        const response = await authApi.updateProfile(data);
+        return response;
+    } catch (error) {
+        return handleApiError(error, rejectWithValue);
+    }
+});
+
 // ---------------------- SLICE ----------------------
 
 const authSlice = createSlice({
@@ -111,6 +120,9 @@ const authSlice = createSlice({
         logoutState: (state) => {
             state.user = null;
             state.token = null;
+            state.refreshToken = null;
+            state.loading = false;
+            state.error = null;
         },
         setError: (state, action) => {
             state.error = action.payload;
@@ -159,6 +171,17 @@ const authSlice = createSlice({
                 state.token = null;
                 state.refreshToken = null;
                 state.error = null;
+            })
+            .addCase(updateProfile.fulfilled, (state, action) => {
+                state.loading = false;
+                state.user = {
+                    ...state.user,
+                    ...action.payload
+                }
+
+                const userData = JSON.parse(localStorage.getItem('userData')) || {};
+                const updatedUserData = { ...userData, ...action.payload };
+                localStorage.setItem('userData', JSON.stringify(updatedUserData));
             })
             // Matcher chung cho pending & rejected
             .addMatcher(

@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { create, getAll, remove, update } from '../../stores/publisherSlice';
 import { toast } from 'react-toastify';
 import { useSearchParams } from 'react-router-dom';
+import AdvancedPagingBar from '../../components/AdvancedPagingBar';
 
 const PublisherManagementPage = () => {
     const dispatch = useDispatch();
@@ -265,11 +266,10 @@ const PublisherManagementPage = () => {
             </Modal>
 
             <div className={`mt-2 ${publishers && publishers.length !== 0 ? '' : 'hidden'}`}>
-                <PagingBar
-                    currentPage={params.page}
+                <AdvancedPagingBar
+                    meta={meta}
                     onPageChange={(page) => updateParams({ page: page })}
-                    pageSize={meta ? meta.limit : 1}
-                    totalPages={meta ? meta.pageCount : 1} />
+                    onLimitChange={(limit) => updateParams({ limit: limit, page: 1 })} />
             </div>
         </div>
     );

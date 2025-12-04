@@ -7,6 +7,10 @@ import addressReducer from '../stores/addressSlice';
 import categoryReducer from '../stores/categorySlice';
 import authorReducer from '../stores/authorSlice';
 import publisherReducer from '../stores/publisherSlice';
+import imageReducer from '../stores/imageSlice';
+import userReducer from '../stores/userSlice';
+import reviewReducer from '../stores/reviewSlice';
+import policyReducer from '../stores/policySlice';
 
 const store = configureStore({
     reducer: {
@@ -18,6 +22,10 @@ const store = configureStore({
         category: categoryReducer,
         author: authorReducer,
         publisher: publisherReducer,
+        image: imageReducer,
+        user: userReducer,
+        review: reviewReducer,
+        policy: policyReducer,
     },
 });
 

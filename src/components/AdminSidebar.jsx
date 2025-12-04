@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
   BookOpen,
@@ -14,18 +14,32 @@ import {
   ChevronDown,
   UserPen,
   Building,
-  Ticket
+  Ticket,
+  Image
 } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { logoutState } from '../stores/authSlice';
 
 const AdminSidebar = () => {
-  const naviagate = useNavigate();
+
   const dispatch = useDispatch();
 
-  const [activeIndex, setActiveIndex] = useState(1);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef(null);
+
+  const menuItems = [
+    { url: "/admin", label: "Tổng quan", index: 1, icon: <LayoutDashboard className="h-5 w-5" /> },
+    { url: "/admin/books", label: "Quản lý sách", index: 2, icon: <BookOpen className="h-5 w-5" /> },
+    { url: "/admin/categories", label: "Quản lý danh mục", index: 3, icon: <WalletCards className="h-5 w-5" /> },
+    { url: "/admin/authors", label: "Quản lý tác giả", index: 4, icon: <UserPen className="h-5 w-5" /> },
+    { url: "/admin/publishers", label: "Quản lý nhà xuất bản", index: 5, icon: <Building className="h-5 w-5" /> },
+    { url: "/admin/vouchers", label: "Quản lý voucher", index: 6, icon: <Ticket className="h-5 w-5" /> },
+    { url: "/admin/orders", label: "Quản lý đơn mua", index: 7, icon: <Package className="h-5 w-5" /> },
+    { url: "/admin/rentals", label: "Quản lý đơn thuê", index: 8, icon: <Clock className="h-5 w-5" /> },
+    { url: "/admin/users", label: "Quản lý người dùng", index: 9, icon: <Users className="h-5 w-5" /> },
+    { url: "/admin/policies", label: "Quản lý chính sách", index: 10, icon: <FileText className="h-5 w-5" /> },
+    { url: "/admin/banners", label: "Quản lý banner", index: 10, icon: <Image className="h-5 w-5" /> },
+  ];
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -47,7 +61,6 @@ const AdminSidebar = () => {
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("userData");
 
-    //naviagate('/login');
     window.location.href = '/admin/login'
   };
 
@@ -59,96 +72,38 @@ const AdminSidebar = () => {
   };
 
   return (
-    <div className="w-60 flex-shrink-0 bg-gray-900 border-r border-gray-700 overflow-hidden flex flex-col h-screen">
+    <div className="w-65 flex-shrink-0 bg-gray-900 border-r border-gray-700 overflow-hidden flex flex-col h-screen">
       {/* Header */}
       <div className="flex items-center gap-2 p-4 border-b border-gray-700">
-        <Link to="/admin/" className="flex items-center gap-2">
-          <div className="text-xl font-serif font-bold text-white">BookHaven Admin</div>
+        <Link to="/admin" className="flex items-center gap-2">
+          <div className="text-xl font-serif font-bold text-white">BookHaven Panel</div>
         </Link>
       </div>
 
       {/* Navigation - Chiếm không gian còn lại */}
       <nav className="p-4 space-y-1 flex-1 overflow-y-auto">
-        <Link
-          to="/admin/"
-          className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${activeIndex === 1 ? 'text-white bg-blue-600 font-medium' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
-          onClick={() => setActiveIndex(1)}
-        >
-          <LayoutDashboard className="h-5 w-5" />
-          <span>Dashboard</span>
-        </Link>
-        <Link
-          to="/admin/books/"
-          className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${activeIndex === 2 ? 'text-white bg-blue-600 font-medium' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
-          onClick={() => setActiveIndex(2)}
-        >
-          <BookOpen className="h-5 w-5" />
-          <span>Quản lý sách</span>
-        </Link>
-        <Link
-          to="/admin/categories/"
-          className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${activeIndex === 3 ? 'text-white bg-blue-600 font-medium' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
-          onClick={() => setActiveIndex(3)}
-        >
-          <WalletCards className="h-5 w-5" />
-          <span>Quản lý danh mục</span>
-        </Link>
-        <Link
-          to="/admin/authors/"
-          className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${activeIndex === 8 ? 'text-white bg-blue-600 font-medium' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
-          onClick={() => setActiveIndex(8)}
-        >
-          <UserPen className="h-5 w-5" />
-          <span>Quản lý tác giả</span>
-        </Link>
-        <Link
-          to="/admin/publishers/"
-          className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${activeIndex === 9 ? 'text-white bg-blue-600 font-medium' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
-          onClick={() => setActiveIndex(9)}
-        >
-          <Building className="h-5 w-5" />
-          <span>Quản lý nhà xuất bản</span>
-        </Link>
-        <Link
-          to="/admin/vouchers/"
-          className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${activeIndex === 10 ? 'text-white bg-blue-600 font-medium' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
-          onClick={() => setActiveIndex(10)}
-        >
-          <Ticket className="h-5 w-5" />
-          <span>Quản lý voucher</span>
-        </Link>
-        <Link
-          to="/admin/orders/"
-          className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${activeIndex === 4 ? 'text-white bg-blue-600 font-medium' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
-          onClick={() => setActiveIndex(4)}
-        >
-          <Package className="h-5 w-5" />
-          <span>Quản lý đơn mua</span>
-        </Link>
-        <Link
-          to="/admin/rentals/"
-          className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${activeIndex === 5 ? 'text-white bg-blue-600 font-medium' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
-          onClick={() => setActiveIndex(5)}
-        >
-          <Clock className="h-5 w-5" />
-          <span>Quản lý đơn thuê</span>
-        </Link>
-        <Link
-          to="/admin/users/"
-          className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${activeIndex === 6 ? 'text-white bg-blue-600 font-medium' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
-          onClick={() => setActiveIndex(6)}
-        >
-          <Users className="h-5 w-5" />
-          <span>Quản lý người dùng</span>
-        </Link>
-        <Link
-          to="/admin/policies/"
-          className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${activeIndex === 7 ? 'text-white bg-blue-600 font-medium' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
-          onClick={() => setActiveIndex(7)}
-        >
-          <FileText className="h-5 w-5" />
-          <span>Quản lý chính sách</span>
-        </Link>
+        {
+          menuItems.map((item, i) => {
+
+            return (
+              <NavLink
+                key={item.index}
+                to={item.url}
+                end={item.url === "/admin"}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 p-3 rounded-lg transition-colors ${isActive
+                    ? "text-white bg-blue-600 font-medium"
+                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                  }`
+                }
+              >
+                {item.icon}
+                <span>{item.label}</span>
+              </NavLink>
+
+            )
+          })
+        }
       </nav>
 
       {/* Admin Profile - Cố định ở dưới cùng */}
@@ -197,14 +152,6 @@ const AdminSidebar = () => {
                 >
                   <User className="h-4 w-4" />
                   <span>Thông tin cá nhân</span>
-                </Link>
-                <Link
-                  to="/admin/settings"
-                  className="flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white rounded-md transition-colors"
-                  onClick={() => setIsProfileOpen(false)}
-                >
-                  <Settings className="h-4 w-4" />
-                  <span>Cài đặt</span>
                 </Link>
                 <button
                   onClick={handleLogout}

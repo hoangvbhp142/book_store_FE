@@ -1,230 +1,253 @@
-import React, { useState, useEffect } from 'react'
-import { Minus, Plus, Trash2 } from 'lucide-react'
-import rentalOptions from '../data/rentalOption'
-import { useDispatch } from 'react-redux'
-import { removeItems, updateItems } from '../stores/cartSlice'
-import { toast } from 'react-toastify';
-import utils from '../app/utils';
+import React, { useMemo } from 'react'
+import { Link } from 'react-router-dom'
+import { Minus, Plus, X, Calendar, Package, Book } from 'lucide-react'
 
-const CartItem = ({ item }) => {
+const CartItem = ({ item, onRemove, onUpdateQuantity, onToggleSelection }) => {
+  const { book, quantity, type, rentalType, isChecked } = item
 
-    const dispatch = useDispatch();
+  const handleQuantityChange = (newQuantity) => {
+    if (newQuantity >= 1) {
+      onUpdateQuantity(newQuantity)
+    }
+  }
 
-    const [quantity, setQuantity] = useState(item.quantity);
-    const [rentalDays, setRentalDays] = useState(
-        item.rentalDays && item.rentalDays > 0 ? item.rentalDays : rentalOptions[0].days
-    );
+  const getRentalTypeText = (type) => {
+    switch (type) {
+      case 'DAILY': return 'Thuê ngày'
+      case 'WEEKLY': return 'Thuê tuần'
+      case 'MONTHLY': return 'Thuê tháng'
+      default: return 'Thuê'
+    }
+  }
 
-    const calculateReturnDate = (days) => {
-        const currentDate = new Date();
-        currentDate.setDate(currentDate.getDate() + days);
-        return currentDate.toLocaleDateString();
+  // Tính toán giá dựa trên loại giao dịch
+  const { unitPrice, deposit, itemTotal, displayType } = useMemo(() => {
+    if (type === 'PURCHASE') {
+      const price = parseFloat(book?.sellerPrice || 0)
+      return {
+        unitPrice: price,
+        deposit: 0,
+        itemTotal: price * quantity,
+        displayType: 'Mua'
+      }
+    } else if (type === 'RENTAL') {
+      let price = 0
+      let rentalText = ''
+
+      switch (rentalType) {
+        case 'DAILY':
+          price = parseFloat(book?.rentPricePerDay || 0)
+          rentalText = 'Thuê ngày'
+          break
+        case 'WEEKLY':
+          price = parseFloat(book?.rentPricePerWeek || 0)
+          rentalText = 'Thuê tuần'
+          break
+        case 'MONTHLY':
+          price = parseFloat(book?.rentPricePerMonth || 0)
+          rentalText = 'Thuê tháng'
+          break
+        default:
+          price = 0
+          rentalText = 'Thuê'
+      }
+
+      const depositAmount = parseFloat(book?.rentDeposit || 0)
+      return {
+        unitPrice: price,
+        deposit: depositAmount,
+        itemTotal: (price + depositAmount) * quantity,
+        displayType: rentalText
+      }
     }
 
-    const handleQuantityChange = (newQuantity) => {
-        if (newQuantity < 1) return;
-        setQuantity(newQuantity);
-        dispatch(updateItems({ id: item.id, quantity: newQuantity }));
+    return {
+      unitPrice: 0,
+      deposit: 0,
+      itemTotal: 0,
+      displayType: 'Không xác định'
     }
+  }, [type, rentalType, book, quantity])
 
-    const [isPurchase, setIsPurchase] = useState(item.type === 'buy');
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('vi-VN', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount)
+  }
 
-    const handleTypeChange = (type) => {
-        setIsPurchase(type === 'buy');
-
-        if (type === 'rent') {
-
-            const defaultOption = rentalOptions.find(opt => opt.days === rentalDays) || rentalOptions[0];
-
-            setRentalDays(defaultOption.days);
-
-            dispatch(updateItems({
-                id: item.id,
-                type: 'rent',
-                price: defaultOption.price,
-                deposit: item.book.deposit || 0,
-                rentalDays: defaultOption.days
-            }));
-        } else {
-            dispatch(updateItems({
-                id: item.id,
-                type: 'buy',
-                price: item.book.discountPrice || item.book.salePrice || 0,
-                deposit: 0,
-            }));
-        }
-    }
-
-
-    const handleRentalPeriodChange = (days) => {
-        setRentalDays(days);
-        const defaultOption = rentalOptions.find(opt => opt.days === days);
-        dispatch(updateItems(
-            {
-                id: item.id,
-                rentalDays: days,
-                price: defaultOption.price
-            }));
-    }
-
-    const removeItemFromCart = () => {
-        dispatch(removeItems(item.id));
-        toast.success('Đã xóa khỏi giỏ hàng');
-    }
-
-
-    useEffect(() => {
-        setIsPurchase(item.type === 'buy');
-        if (item.rentalDays && item.rentalDays > 0) {
-            setRentalDays(item.rentalDays);
-        }
-        setQuantity(item.quantity || 1);
-    }, [item.type, item.quantity, item.rentalDays]);
-
-    console.log(item);
-
-
+  if (!book) {
     return (
-        <div key={item.id} className="bg-white rounded-lg border border-gray-300 shadow-sm overflow-hidden">
-            <div className="p-6">
-                <div className="flex items-center gap-4">
-                    <input
-                        type="checkbox"
-                        onChange={(e) => dispatch(updateItems({
-                            id: item.id,
-                            isChecked: e.target.checked
-                        }))}
-                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    />
-
-                    <div className="w-24 h-32 bg-gray-100 rounded flex-shrink-0">
-                        <img
-                            src={item.image}
-                            alt={item.title}
-                            className="w-full h-full object-cover rounded"
-                        />
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-4 mb-2">
-                            <div className="flex-1 min-w-0">
-                                {/* Type Toggle Button */}
-                                <div className="flex items-center gap-2 mb-3">
-                                    <button
-                                        onClick={() => handleTypeChange('buy')}
-                                        className={`px-3 py-1 text-sm font-medium rounded-full transition-colors ${isPurchase
-                                            ? "bg-blue-600 text-white"
-                                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                            }`}
-                                    >
-                                        Mua
-                                    </button>
-                                    <button
-                                        onClick={() => handleTypeChange('rent')}
-                                        className={`px-3 py-1 text-sm font-medium rounded-full transition-colors ${!isPurchase
-                                            ? "bg-green-600 text-white"
-                                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                            }`}
-                                    >
-                                        Thuê
-                                    </button>
-                                </div>
-
-                                <h3 className="font-semibold text-lg mb-1 line-clamp-2">{item.title}</h3>
-
-                                {!isPurchase && (
-                                    <div className="mb-3 p-3 bg-gray-50 rounded-lg">
-                                        <label className="block text-xs font-medium text-gray-700 mb-2">
-                                            Chọn thời gian thuê
-                                        </label>
-                                        <div className="flex flex-wrap gap-2">
-                                            {rentalOptions.map((period) => (
-                                                <button
-                                                    key={period.days}
-                                                    onClick={() => handleRentalPeriodChange(period.days)}
-                                                    className={`px-3 py-2 text-xs rounded border transition-colors ${rentalDays === period.days
-                                                        ? "bg-green-100 border-green-500 text-green-700"
-                                                        : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-                                                        }`}
-                                                >
-                                                    <div className="font-medium">{period.label}</div>
-                                                    <div className="text-gray-600">{utils.formatCurrency(period.price)}</div>
-                                                </button>
-                                            ))}
-                                        </div>
-
-                                        {/* Thông tin thuê */}
-                                        {item.rentalDays && (
-                                            <div className="mt-3 text-xs text-gray-600 space-y-1 border-t border-gray-200 pt-3">
-                                                <p>• Thời gian thuê: {item.rentalDays} ngày</p>
-                                                <p>• Ngày trả dự kiến: {calculateReturnDate(item.rentalDays)}</p>
-                                                <div className="bg-yellow-50 border border-yellow-200 p-2 rounded-lg text-yellow-800 mt-2">
-                                                    <p className="font-medium">Tiền cọc: {utils.formatCurrency(item.deposit)}</p>
-                                                    <p className="text-[11px]">Cọc sẽ được hoàn lại khi bạn trả sách đúng hạn.</p>
-                                                </div>
-                                                <p className="text-green-600 font-semibold mt-2">
-                                                    Tổng tiền thanh toán: {utils.formatCurrency(item.price + item.deposit)}
-                                                </p>
-                                            </div>
-
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                            <button
-                                onClick={removeItemFromCart}
-                                className="p-2 text-red-500 hover:text-red-700 rounded-full hover:bg-red-50 transition-colors"
-                            >
-                                <Trash2 className="h-4 w-4" />
-                            </button>
-                        </div>
-
-                        <div className="flex items-center justify-between mt-4">
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() => handleQuantityChange(item.quantity - 1)}
-                                    className="w-8 h-8 border border-gray-300 rounded-full bg-transparent flex items-center justify-center hover:bg-gray-50 transition-colors"
-                                >
-                                    <Minus className="h-3 w-3" />
-                                </button>
-                                <span className="w-12 text-center font-medium">{item.quantity}</span>
-                                <button
-                                    onClick={() => handleQuantityChange(item.quantity + 1)}
-                                    className="w-8 h-8 border border-gray-300 rounded-full bg-transparent flex items-center justify-center hover:bg-gray-50 transition-colors"
-                                >
-                                    <Plus className="h-3 w-3" />
-                                </button>
-                            </div>
-
-                            <div className="text-right">
-                                {
-                                    isPurchase ? (
-                                        <>
-                                            <p className="font-bold text-lg">
-                                                {utils.formatCurrency(item.quantity * item.price)}
-                                            </p>
-                                            {item.quantity > 1 && (
-                                                <p className="text-xs text-gray-600">{utils.formatCurrency(item.price)} {item.type === 'buy' ? 'mỗi cuốn' : 'mỗi cuốn/ngày'}</p>
-                                            )}
-                                        </>
-                                    ) : (
-                                        <>
-                                            <p className="font-bold text-lg">
-                                                {utils.formatCurrency(item.price * item.quantity + item.deposit)}
-                                            </p>
-                                            <p className="text-xs text-gray-600">
-                                                Bao gồm cọc: {utils.formatCurrency(item.deposit)}
-                                            </p>
-                                        </>
-                                    )
-                                }
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+        <div className="flex items-center justify-center text-gray-400">
+          <Package className="h-6 w-6 mr-2" />
+          <span>Sách không tồn tại</span>
         </div>
+      </div>
     )
+  }
+
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex gap-4">
+        {/* Checkbox */}
+        <div className="flex items-start pt-1">
+          <input
+            type="checkbox"
+            checked={isChecked || false}
+            onChange={onToggleSelection}
+            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+          />
+        </div>
+
+        {/* Book Image */}
+        <Link
+          to={`/book/${book.id}`}
+          className="flex-shrink-0 w-24 h-32 bg-gray-100 rounded-lg overflow-hidden hover:opacity-90 transition-opacity"
+        >
+          {book.photoUrl ? (
+            <img
+              src={book.photoUrl.replace('http://minio:9000', 'http://localhost:9000')}
+              alt={book.title}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.onerror = null
+                e.target.src = 'https://via.placeholder.com/96x128?text=No+Image'
+              }}
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-blue-50 to-gray-100 flex items-center justify-center">
+              <Book className="h-8 w-8 text-gray-400" />
+            </div>
+          )}
+        </Link>
+
+        {/* Book Details */}
+        <div className="flex-1 min-w-0">
+          <div className="flex justify-between items-start mb-2">
+            <Link
+              to={`/book/${book.id}`}
+              className="hover:text-blue-600 transition-colors"
+            >
+              <h3 className="font-semibold text-gray-900 text-base mb-1 line-clamp-2">
+                {book.title}
+              </h3>
+            </Link>
+            <button
+              onClick={onRemove}
+              className="text-gray-400 hover:text-red-600 transition-colors ml-2 p-1 rounded-full hover:bg-red-50"
+              title="Xóa khỏi giỏ hàng"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          {/* Book info */}
+          <div className="space-y-1 mb-3">
+            <p className="text-sm text-gray-500">
+              SKU: <span className="font-mono">{book.sku}</span>
+            </p>
+            {book.language && (
+              <p className="text-sm text-gray-500">
+                Ngôn ngữ: {book.language}
+              </p>
+            )}
+          </div>
+
+          {/* Transaction Type */}
+          <div className="flex items-center gap-2 mb-4">
+            <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${type === 'PURCHASE'
+              ? 'bg-blue-100 text-blue-800'
+              : 'bg-green-100 text-green-800'
+              }`}>
+              {type === 'PURCHASE' ? (
+                <Package className="h-3 w-3" />
+              ) : (
+                <Calendar className="h-3 w-3" />
+              )}
+              {displayType}
+            </span>
+
+            {type === 'RENTAL' && rentalType && (
+              <span className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">
+                {getRentalTypeText(rentalType)}
+              </span>
+            )}
+          </div>
+
+          {/* Price and Quantity */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            {/* Quantity Controls */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handleQuantityChange(quantity - 1)}
+                disabled={quantity <= 1}
+                className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                title="Giảm số lượng"
+              >
+                <Minus className="h-3 w-3" />
+              </button>
+              <div className="w-12 text-center">
+                <span className="font-semibold text-gray-900 text-base">{quantity}</span>
+              </div>
+              <button
+                onClick={() => handleQuantityChange(quantity + 1)}
+                disabled={quantity >= (book.stockQty || 99)}
+                className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                title="Tăng số lượng"
+              >
+                <Plus className="h-3 w-3" />
+              </button>
+
+              {book.stockQty !== undefined && (
+                <span className="text-xs text-gray-500 ml-2">
+                  Còn {book.stockQty} sản phẩm
+                </span>
+              )}
+            </div>
+
+            {/* Price Details */}
+            <div className="text-right">
+              {/* Unit Price */}
+              <div className="mb-1">
+                <span className="text-sm text-gray-500">Đơn giá: </span>
+                <span className="font-semibold text-gray-900">
+                  {formatCurrency(unitPrice)}đ
+                </span>
+                {type === 'RENTAL' && deposit > 0 && (
+                  <span className="text-sm text-gray-500 ml-1">
+                    (+{formatCurrency(deposit)}đ cọc)
+                  </span>
+                )}
+              </div>
+
+              {/* Total Price */}
+              <div>
+                <span className="text-sm text-gray-500">Thành tiền: </span>
+                <span className="text-lg font-bold text-blue-600">
+                  {formatCurrency(itemTotal)}đ
+                </span>
+                {quantity > 1 && (
+                  <div className="text-xs text-gray-500 mt-1">
+                    {formatCurrency(unitPrice + deposit)}đ × {quantity}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Additional Info for Rental */}
+          {type === 'RENTAL' && book.rentPenaltyPerDay && (
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              <p className="text-xs text-gray-500">
+                Phí phạt trễ: {formatCurrency(parseFloat(book.rentPenaltyPerDay))}đ/ngày
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export default CartItem
