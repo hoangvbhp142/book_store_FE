@@ -49,6 +49,7 @@ import VoucherManagementPage from './pages/admin/VoucherManagementPage'
 import ChatBubble from './components/ChatBubble'
 import BannerManagementPage from './pages/admin/BannerManagementPage'
 import AdminOrderDetail from './pages/admin/AdminOrderDetail'
+import AnnouncementPopup from './components/AnnouncementPopup'
 
 function App() {
   return (
@@ -143,6 +144,7 @@ function LayoutWrapper({ children }) {
 
   return (
     <>
+      <AnnouncementPopup />
       {!isHideLayout && <Header />}
       {children}
       {!isHideLayout && <Footer />}
