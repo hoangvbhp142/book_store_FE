@@ -117,6 +117,12 @@ const AdminBooksPage = () => {
     return (
         <main className="flex-1 bg-gray-50/30 min-h-screen">
             <div className="container mx-auto p-4">
+
+                <div className="flex justify-between items-center mb-6">
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-900">Quản Lý Sách</h1>
+                    </div>
+                </div>
                 {/* Search and Filter Section */}
                 <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-4">
 

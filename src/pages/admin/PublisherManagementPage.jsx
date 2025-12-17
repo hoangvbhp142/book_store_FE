@@ -129,7 +129,7 @@ const PublisherManagementPage = () => {
     return (
         <div className="container mx-auto p-4 max-w-6xl bg-white">
             <div className="flex items-center justify-between mb-3">
-                <h2 className="text-lg font-semibold">Quản lý nhà xuất bản</h2> {/* Đổi tiêu đề */}
+                <h1 className="text-2xl font-bold text-gray-900">Quản Lý Nhà Xuất Bản</h1>
                 <button
                     onClick={openAddModal}
                     className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"

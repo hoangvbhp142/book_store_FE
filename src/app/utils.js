@@ -1,6 +1,9 @@
 //format gia tien
 const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    return new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND'
+    }).format(amount);
 }
 
 //xu ly exception khi goi api
@@ -75,13 +78,35 @@ const addNodeToTree = (tree, parentId, newNode) => {
     return false;
 }
 
+// Hàm format ngày
+const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+};
+
+// Hàm format ngày chỉ ngày tháng
+const formatDateOnly = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN');
+};
+
 const utils = {
     formatCurrency,
     handleApiError,
     buildTree,
     addNodeToTree,
-    getDiff
+    getDiff,
+    formatDateOnly,
+    formatDate
 }
 
-export { formatCurrency, handleApiError, buildTree, addNodeToTree, getDiff }
+export { formatCurrency, handleApiError, buildTree, addNodeToTree, getDiff, formatDateOnly, formatDate }
 export default utils;

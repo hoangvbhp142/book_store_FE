@@ -6,6 +6,14 @@ import { formatCurrency } from '../app/utils';
 import { toast } from 'react-toastify';
 import addressApi from '../api/addressApi';
 import { fetchCart } from '../stores/cartSlice';
+import orderApi from '../api/orderApi';
+
+const paymentOptions = [
+    { id: 'vnpay', label: 'VNPay', description: 'Thanh toán qua ví điện tử VNPay', icon: <QrCode />, isHide: false },
+    { id: 'card', label: 'Thẻ tín dụng/Ghi nợ', description: 'Visa, Mastercard, JCB, American Express', icon: <CreditCard />, isHide: true },
+    { id: 'cod', label: 'Thanh toán khi nhận hàng (COD)', description: 'Thanh toán bằng tiền mặt khi nhận hàng', icon: <HandCoins />, isHide: true },
+    { id: 'bank', label: 'Chuyển khoản ngân hàng', description: 'Chuyển khoản qua Internet Banking', icon: <Landmark />, isHide: true },
+];
 
 const CheckoutForm = () => {
 
@@ -15,11 +23,12 @@ const CheckoutForm = () => {
     // ========== STATE DECLARATIONS ==========
     const [selectedAddress, setSelectedAddress] = useState('');
     const [showNewAddress, setShowNewAddress] = useState(false);
-    const [paymentMethod, setPaymentMethod] = useState('');
+    const [paymentMethod, setPaymentMethod] = useState('vnpay');
     const [shipmentMethod, setShipmentMethod] = useState('normal');
     const [code, setCode] = useState('');
     const [isOrderSummaryVisible, setIsOpenSummaryVisible] = useState(true);
     const [addresses, setAddresses] = useState([]);
+    const [selectedItems, setSelectedItems] = useState([]);
     const [formData, setFormData] = useState({
         name: '',
         phone: '',
@@ -47,13 +56,18 @@ const CheckoutForm = () => {
         fetchCartData();
     }, []);
 
+    useEffect(() => {
+        const selected = items.filter(item => item.isSelected);
+        setSelectedItems(selected);
+    }, [items]);
+
     // ========== CALCULATIONS ==========
     const { subtotal, purchaseItems, rentalItems } = React.useMemo(() => {
         let subtotalCalc = 0;
         const purchaseItems = [];
         const rentalItems = [];
 
-        items.forEach(item => {
+        selectedItems.forEach(item => {
             const { book, quantity, type, rentalType } = item;
 
             if (!book) return;
@@ -88,13 +102,15 @@ const CheckoutForm = () => {
             purchaseItems,
             rentalItems
         };
-    }, [items]);
+    }, [selectedItems]);
 
     console.log(items);
+    console.log(paymentMethod);
+    console.log(selectedAddress);
+
 
     const shipping = shipmentMethod === 'normal' ? 0 : 30000;
-    const tax = subtotal * 0.08;
-    const total = subtotal + shipping + tax;
+    const total = subtotal + shipping;
 
     // ========== HELPER FUNCTIONS ==========
     const formatAddress = (addr) => {
@@ -161,6 +177,21 @@ const CheckoutForm = () => {
 
     const createOrder = async () => {
         // Logic tạo đơn hàng sẽ được thêm ở đây
+        try {
+            const response = await orderApi.createOrder({
+                addressId: selectedAddress
+            });
+
+            if (response?.paymentUrl) {
+                window.location.href = response.paymentUrl;
+                return;
+            }
+            console.log(response);
+
+        } catch (error) {
+            console.log(error);
+            toast.error(error?.response?.data?.message || 'Lỗi khi tạo đơn hàng!');
+        }
     }
 
     // ========== EVENT HANDLERS ==========
@@ -209,6 +240,11 @@ const CheckoutForm = () => {
     const handleApply = () => {
         console.log('Áp dụng mã:', code);
     };
+
+    const handlePlaceOrder = () => {
+        console.log('Đặt hàng với phương thức thanh toán:', paymentMethod);
+        createOrder();
+    }
 
     // ========== RENDER LOGIC ==========
     // Hiển thị loading (giữ nguyên từ code của bạn)
@@ -413,11 +449,6 @@ const CheckoutForm = () => {
                             <span className="font-medium text-green-600">
                                 {shipping === 0 ? "MIỄN PHÍ" : `${formatCurrency(shipping)}`}
                             </span>
-                        </div>
-
-                        <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Thuế (8%)</span>
-                            <span className="font-medium text-gray-900">{formatCurrency(tax)}</span>
                         </div>
 
                         <hr className="border-gray-200 my-4" />
@@ -660,120 +691,40 @@ const CheckoutForm = () => {
                         </div>
 
                         <div className="space-y-3">
-                            {/* COD */}
-                            <div
-                                onClick={() => setPaymentMethod('cod')}
-                                className={`border rounded-md p-4 cursor-pointer transition-all ${paymentMethod === 'cod'
-                                    ? 'border-blue-500 bg-blue-50'
-                                    : 'border-gray-300 hover:border-gray-400'
-                                    }`}
-                            >
-                                <div className="flex items-center gap-3">
-                                    <input
-                                        type="radio"
-                                        id="cod"
-                                        name="payment"
-                                        checked={paymentMethod === 'cod'}
-                                        onChange={() => setPaymentMethod('cod')}
-                                        className="w-4 h-4 text-blue-600"
-                                    />
-                                    <label htmlFor="cod" className="flex-1 cursor-pointer">
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <p className="font-semibold text-sm text-gray-900">Thanh toán khi nhận hàng (COD)</p>
-                                                <p className="text-xs text-gray-600 mt-0.5">Thanh toán bằng tiền mặt khi nhận hàng</p>
-                                            </div>
-                                            <HandCoins className="h-6 w-6 text-gray-500" />
+                            {
+                                paymentOptions.map(option => (
+                                    <div
+                                        key={option.id}
+                                        onClick={() => setPaymentMethod(option.id)}
+                                        className={`${option.isHide ? 'hidden' : ''} border rounded-md p-4 cursor-pointer transition-all ${paymentMethod === option.id
+                                            ? 'border-blue-500 bg-blue-50'
+                                            : 'border-gray-300 hover:border-gray-400'
+                                            }`}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <input
+                                                type="radio"
+                                                id={option.id}
+                                                name="payment"
+                                                checked={paymentMethod === option.id}
+                                                onChange={() => setPaymentMethod(option.id)}
+                                                className="w-4 h-4 text-blue-600"
+                                            />
+                                            <label htmlFor={option.id} className="flex-1 cursor-pointer">
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        <p className="font-semibold text-sm text-gray-900">{option.label}</p>
+                                                        <p className="text-xs text-gray-600 mt-0.5">{option.description}</p>
+                                                    </div>
+                                                    <div className="h-6 w-6 text-gray-500">
+                                                        {option.icon}
+                                                    </div>
+                                                </div>
+                                            </label>
                                         </div>
-                                    </label>
-                                </div>
-                            </div>
-
-                            {/* Chuyển khoản ngân hàng */}
-                            <div
-                                onClick={() => setPaymentMethod('bank')}
-                                className={`border rounded-md p-4 cursor-pointer transition-all ${paymentMethod === 'bank'
-                                    ? 'border-blue-500 bg-blue-50'
-                                    : 'border-gray-300 hover:border-gray-400'
-                                    }`}
-                            >
-                                <div className="flex items-center gap-3">
-                                    <input
-                                        type="radio"
-                                        id="bank"
-                                        name="payment"
-                                        checked={paymentMethod === 'bank'}
-                                        onChange={() => setPaymentMethod('bank')}
-                                        className="w-4 h-4 text-blue-600"
-                                    />
-                                    <label htmlFor="bank" className="flex-1 cursor-pointer">
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <p className="font-semibold text-sm text-gray-900">Chuyển khoản ngân hàng</p>
-                                                <p className="text-xs text-gray-600 mt-0.5">Chuyển khoản qua Internet Banking hoặc QR Code</p>
-                                            </div>
-                                            <Landmark className="h-6 w-6 text-gray-500" />
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
-
-                            {/* Thẻ tín dụng/ghi nợ */}
-                            <div
-                                onClick={() => setPaymentMethod('card')}
-                                className={`border rounded-md p-4 cursor-pointer transition-all ${paymentMethod === 'card'
-                                    ? 'border-blue-500 bg-blue-50'
-                                    : 'border-gray-300 hover:border-gray-400'
-                                    }`}
-                            >
-                                <div className="flex items-center gap-3">
-                                    <input
-                                        type="radio"
-                                        id="card"
-                                        name="payment"
-                                        checked={paymentMethod === 'card'}
-                                        onChange={() => setPaymentMethod('card')}
-                                        className="w-4 h-4 text-blue-600"
-                                    />
-                                    <label htmlFor="card" className="flex-1 cursor-pointer">
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <p className="font-semibold text-sm text-gray-900">Thẻ tín dụng/ghi nợ</p>
-                                                <p className="text-xs text-gray-600 mt-0.5">Visa, Mastercard, JCB, American Express</p>
-                                            </div>
-                                            <CreditCard className="h-6 w-6 text-gray-500" />
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div
-                                onClick={() => setPaymentMethod('vnpay')}
-                                className={`border rounded-md p-4 cursor-pointer transition-all ${paymentMethod === 'vnpay'
-                                    ? 'border-blue-500 bg-blue-50'
-                                    : 'border-gray-300 hover:border-gray-400'
-                                    }`}
-                            >
-                                <div className="flex items-center gap-3">
-                                    <input
-                                        type="radio"
-                                        id="vnpay"
-                                        name="payment"
-                                        checked={paymentMethod === 'vnpay'}
-                                        onChange={() => setPaymentMethod('vnpay')}
-                                        className="w-4 h-4 text-blue-600"
-                                    />
-                                    <label htmlFor="vnpay" className="flex-1 cursor-pointer">
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <p className="font-semibold text-sm text-gray-900">VNPay</p>
-                                                <p className="text-xs text-gray-600 mt-0.5">Thanh toán qua ví điện tử VNPay</p>
-                                            </div>
-                                            <QrCode className='h-6 w-6 text-gray-500' />
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
+                                    </div>
+                                ))
+                            }
                         </div>
 
                         {/* Form nhập thông tin thẻ khi chọn Credit Card */}
@@ -863,12 +814,13 @@ const CheckoutForm = () => {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 px-4 py-6">
                         <button
+                            onClick={handlePlaceOrder}
                             className="w-full bg-blue-600 text-white py-3 rounded-xl text-lg font-semibold
                hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-blue-200 hover:scale-105
                focus:outline-none focus:ring-2 focus:ring-blue-500 md:order-2"
-                            disabled={items.length === 0}
+                            disabled={selectedItems.length === 0}
                         >
-                            {items.length === 0 ? 'Giỏ hàng trống' : 'Đặt hàng'}
+                            {selectedItems.length === 0 ? 'Giỏ hàng trống' : 'Đặt hàng'}
                         </button>
 
                         <Link

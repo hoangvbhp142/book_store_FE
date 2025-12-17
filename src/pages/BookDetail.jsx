@@ -291,6 +291,9 @@ const BookDetail = () => {
       </div>
     );
   }
+
+  console.log(selectedBook);
+  
   return (
     <div className="min-h-screen flex flex-col text-gray-800">
       <div className="container mx-auto px-4 py-6 flex-1">
@@ -331,7 +334,7 @@ const BookDetail = () => {
                     ))
                   ) : (
                     // Fallback: hiển thị ảnh chính nếu không có ảnh phụ
-                    [1, 2, 3].map((img) => (
+                    [1].map((img) => (
                       <div key={img} className="w-16 h-20 bg-gray-100 border border-gray-200 rounded-lg hover:border-blue-400 cursor-pointer p-0.5">
                         <img
                           src={selectedBook.photoUrl.replace("http://minio:9000", "http://localhost:9000")}

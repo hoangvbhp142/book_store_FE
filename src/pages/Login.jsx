@@ -43,6 +43,8 @@ const Login = ({ mode }) => {
         if (authScreenState === "login") {
             const result = await dispatch(login({ email, password })).unwrap();
 
+            console.log(result);
+
             if ((mode === 'admin' && result.role !== 'ADMIN') || (mode === 'customer' && result.role !== 'USER')) {
                 dispatch(setError("Thông tin đăng nhập không chính xác"));
                 return;
@@ -96,18 +98,22 @@ const Login = ({ mode }) => {
 
     useEffect(() => {
         if (user) {
-            if (mode === 'admin' && user.role !== 'Admin') {
+            console.log(user);
+            
+            if (mode === 'admin' && user.role !== 'ADMIN') {
+                console.log("hể");
+                
                 dispatch(setError("Thông tin đăng nhập không chính xác"));
                 return;
             }
 
-            if (mode === 'customer' && user.role === 'Admin') {
+            if (mode === 'customer' && user.role === 'ADMIN') {
                 dispatch(setError("Thông tin đăng nhập không chính xác"));
                 return;
             }
 
-            localStorage.setItem('token', user.role === 'Admin' ? 'admin-token' : 'customer-token');
-            navigate(user.role === "Admin" ? "/admin" : "/");
+            localStorage.setItem('token', user.role === 'ADMIN' ? 'admin-token' : 'customer-token');
+            navigate(user.role === "ADMIN" ? "/admin" : "/");
             // window.location.href = (user.role === "Admin" ? "/admin" : "/");
         }
     }, [user, mode, navigate, dispatch]);

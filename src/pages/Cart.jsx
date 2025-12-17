@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { Link } from "react-router-dom"
+import { data, Link } from "react-router-dom"
 import { ArrowLeft, ShieldCheck, ShoppingBag, Trash2, Book, Calendar, Package } from "lucide-react"
 import CartItem from '../components/CartItem'
 import { useDispatch, useSelector } from 'react-redux'
@@ -28,13 +28,15 @@ const Cart = () => {
     const selectedItems = [];
 
     items.forEach(item => {
-      const { book, quantity, type, rentalType } = item;
+      const { book, quantity, type, rentalType, isSelected } = item;
 
       if (!book) return;
 
       if (type === 'PURCHASE') {
-        const price = parseFloat(book.sellerPrice || 0);
-        subtotalCalc += price * quantity;
+        if (isSelected) {
+          const price = parseFloat(book.sellerPrice || 0);
+          subtotalCalc += price * quantity;
+        }
         purchaseItems.push(item);
       } else if (type === 'RENTAL') {
         let price = 0;
@@ -51,12 +53,14 @@ const Cart = () => {
           default:
             price = 0;
         }
-        const deposit = parseFloat(book.rentDeposit || 0);
-        subtotalCalc += (price + deposit) * quantity;
+        if (isSelected) {
+          const deposit = parseFloat(book.rentDeposit || 0);
+          subtotalCalc += (price + deposit) * quantity;
+        }
         rentalItems.push(item);
       }
 
-      if (item.isChecked) {
+      if (item.isSelected) {
         selectedItems.push(item);
       }
     });
@@ -75,7 +79,7 @@ const Cart = () => {
   const total = subtotal;
 
   // Kiểm tra xem tất cả items có được chọn không
-  const areAllItemsSelected = items.length > 0 && items.every(item => item.isChecked);
+  const areAllItemsSelected = items.length > 0 && items.every(item => item.isSelected);
 
   // Fetch cart khi component mount
   useEffect(() => {
@@ -92,13 +96,7 @@ const Cart = () => {
   // Xử lý chọn/bỏ chọn tất cả
   const handleSelectAll = () => {
     items.forEach(item => {
-      if (item.isChecked !== !areAllItemsSelected) {
-        dispatch(toggleItemSelection({
-          id: item.id,
-          cartItemId: item.id,
-          type: item.type
-        }));
-      }
+      handleToggleSelection(item.id, !areAllItemsSelected);
     });
   };
 
@@ -119,6 +117,7 @@ const Cart = () => {
         await dispatch(clearCart()).unwrap();
         toast.success('Đã xóa tất cả sản phẩm khỏi giỏ hàng');
       } catch (error) {
+        console.log(error);
         toast.error(error.message || 'Lỗi khi xóa giỏ hàng');
       }
     }
@@ -160,11 +159,54 @@ const Cart = () => {
   };
 
   // Xử lý toggle selection
-  const handleToggleSelection = (itemId, type) => {
-    console.log("clicked");
-    
-    dispatch(toggleItemSelection({ id: itemId, cartItemId: itemId, type }));
+  const handleToggleSelection = async (itemId, isSelected) => {
+    console.log("clicked", isSelected);
+    try {
+      await dispatch(updateCartItem({ itemId, data: { isSelected: isSelected } })).unwrap();
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message || 'Lỗi khi cập nhật lựa chọn sản phẩm');
+    }
   };
+
+  const handleTypeChange = async (itemId, newType) => {
+    try {
+      let rentalType = null;
+      if (newType === "RENTAL") {
+        await dispatch(updateCartItem({
+          itemId,
+          data: {
+            type: newType,
+            rentalType: 'DAILY'
+          }
+        })).unwrap();
+      } else {
+        await dispatch(updateCartItem({
+          itemId,
+          data: {
+            type: newType,
+            rentalType: null
+          }
+        })).unwrap();
+      }
+      console.log("new type", newType);
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message || 'Lỗi khi cập nhật loại sản phẩm');
+    }
+  }
+
+  const handleUpdateRentalType = async (itemId, rentalType) => {
+    try {
+      await dispatch(updateCartItem({
+        itemId,
+        data: { rentalType: rentalType }
+      })).unwrap();
+    } catch (error) {
+      toast.error(error.message || 'Lỗi khi cập nhật kiểu thuê');
+    }
+  };
+
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -184,6 +226,9 @@ const Cart = () => {
       </div>
     );
   }
+
+  console.log(items);
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -254,11 +299,14 @@ const Cart = () => {
                       key={item.id}
                       item={item}
                       onRemove={() => handleRemoveItem(item.id)}
+                      onUpdateType={(newType) =>
+                        handleTypeChange(item.id, newType)
+                      }
                       onUpdateQuantity={(newQuantity) =>
                         handleUpdateQuantity(item.id, newQuantity)
                       }
-                      onToggleSelection={() =>
-                        handleToggleSelection(item.id, item.type)
+                      onToggleSelection={(checked) =>
+                        handleToggleSelection(item.id, checked)
                       }
                     />
                   ))}
@@ -277,11 +325,17 @@ const Cart = () => {
                       key={item.id}
                       item={item}
                       onRemove={() => handleRemoveItem(item.id)}
+                      onUpdateType={(newType) =>
+                        handleTypeChange(item.id, newType)
+                      }
+                      onUpdateRentalType={(rentalType) =>
+                        handleUpdateRentalType(item.id, rentalType)
+                      }
                       onUpdateQuantity={(newQuantity) =>
                         handleUpdateQuantity(item.id, newQuantity)
                       }
-                      onToggleSelection={() =>
-                        handleToggleSelection(item.id, item.type)
+                      onToggleSelection={(checked) =>
+                        handleToggleSelection(item.id, checked)
                       }
                     />
                   ))}
@@ -323,7 +377,7 @@ const Cart = () => {
                   {/* Price Breakdown */}
                   <div className="space-y-3 mb-6">
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Tạm tính ({items.length} sản phẩm)</span>
+                      <span className="text-gray-600">Tạm tính ({selectedItems.length} sản phẩm)</span>
                       <span className="font-medium text-gray-900">
                         {formatCurrency(subtotal)}đ
                       </span>

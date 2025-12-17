@@ -59,13 +59,13 @@ const CategoryNode = ({ category, expandedCategories, selectedCategories, onTogg
     );
 };
 
-const FilterSidebar = ({ onFilterChange, categories }) => {
+const FilterSidebar = ({ onFilterChange, categories, mode, filter }) => {
 
     // State cho bộ lọc
     const [expandedCategories, setExpandedCategories] = useState([]);
-    const [selectedCategories, setSelectedCategories] = useState([]);
-    const [priceRange, setPriceRange] = useState([]);
-    const [rating, setRating] = useState([]);
+    const [selectedCategories, setSelectedCategories] = useState(filter?.selectedCategories || []);
+    const [priceRange, setPriceRange] = useState(filter?.priceRange || []);
+    const [rating, setRating] = useState(filter?.rating || []);
 
     // Xây dựng cây danh mục từ danh sách phẳng
     const categoryTree = useMemo(() => {
@@ -162,7 +162,7 @@ const FilterSidebar = ({ onFilterChange, categories }) => {
 
     return (
         <aside className="w-full lg:w-80 flex-shrink-0">
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+            <div className="bg-white border border-gray-200 overflow-hidden">
                 <div className="p-5">
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-2">
@@ -178,25 +178,29 @@ const FilterSidebar = ({ onFilterChange, categories }) => {
                     </div>
 
                     {/* Categories Filter */}
-                    <div className="mb-6">
-                        <h3 className="font-semibold mb-3">Danh mục</h3>
-                        <div className="space-y-2 max-h-60 overflow-y-auto">
-                            {categoryTree.length > 0 ? (
-                                categoryTree.map(category => (
-                                    <CategoryNode
-                                        key={category.id}
-                                        category={category}
-                                        expandedCategories={expandedCategories}
-                                        selectedCategories={selectedCategories}
-                                        onToggleExpand={handleToggleExpand}
-                                        onCategoryCheck={handleCategoryCheck}
-                                    />
-                                ))
-                            ) : (
-                                <p className="text-sm text-gray-500">Không có danh mục nào</p>
-                            )}
-                        </div>
-                    </div>
+                    {
+                        mode === 'search' && (
+                            <div className="mb-6">
+                                <h3 className="font-semibold mb-3">Danh mục</h3>
+                                <div className="space-y-2 max-h-60 overflow-y-auto">
+                                    {categoryTree.length > 0 ? (
+                                        categoryTree.map(category => (
+                                            <CategoryNode
+                                                key={category.id}
+                                                category={category}
+                                                expandedCategories={expandedCategories}
+                                                selectedCategories={selectedCategories}
+                                                onToggleExpand={handleToggleExpand}
+                                                onCategoryCheck={handleCategoryCheck}
+                                            />
+                                        ))
+                                    ) : (
+                                        <p className="text-sm text-gray-500">Không có danh mục nào</p>
+                                    )}
+                                </div>
+                            </div>
+                        )
+                    }
 
                     {/* Price Range Filter */}
                     <div className="mb-6">
@@ -245,7 +249,7 @@ const FilterSidebar = ({ onFilterChange, categories }) => {
                     </div>
 
                     {/* Selected Filters Count */}
-                    {(selectedCategories.length > 0 ||
+                    {/* {(selectedCategories.length > 0 ||
                         priceRange.length > 0 ||
                         rating.length > 0) && (
                             <div className="mb-4 p-3 bg-blue-50 rounded-lg">
@@ -257,7 +261,7 @@ const FilterSidebar = ({ onFilterChange, categories }) => {
                                     ].filter(Boolean).join(', ')}
                                 </p>
                             </div>
-                        )}
+                        )} */}
                 </div>
             </div>
         </aside>

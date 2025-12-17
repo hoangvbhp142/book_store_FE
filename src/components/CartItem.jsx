@@ -1,14 +1,57 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Minus, Plus, X, Calendar, Package, Book } from 'lucide-react'
+import { Minus, Plus, X, Calendar, Package, Book, ChevronDown } from 'lucide-react'
 
-const CartItem = ({ item, onRemove, onUpdateQuantity, onToggleSelection }) => {
-  const { book, quantity, type, rentalType, isChecked } = item
+const CartItem = ({ item, onRemove, onUpdateQuantity, onToggleSelection, onUpdateType, onUpdateRentalType }) => {
+  const { book, quantity, type, rentalType, isSelected } = item
+  const [selectedType, setSelectedType] = useState(type)
+  const [selectedRentalType, setSelectedRentalType] = useState(rentalType || 'DAILY')
+  const [showRentalOptions, setShowRentalOptions] = useState(type === 'RENTAL' ? true : false);
+
+  // Cập nhật state khi item thay đổi
+  useEffect(() => {
+    setSelectedType(type)
+    setSelectedRentalType(rentalType || 'DAILY')
+  }, [type, rentalType])
 
   const handleQuantityChange = (newQuantity) => {
     if (newQuantity >= 1) {
       onUpdateQuantity(newQuantity)
     }
+  }
+
+  const handleCheckboxChange = (e) => {
+    onToggleSelection(e.target.checked);
+    console.log("cartitem", "lmao");
+  }
+
+  const handleTypeChange = (newType) => {
+    setSelectedType(newType)
+
+    if (newType === 'PURCHASE') {
+      // Khi chuyển sang mua, không cần rentalType
+      if (onUpdateType) {
+        onUpdateType(newType, null);
+      }
+    } else {
+      // Khi chuyển sang thuê, mặc định là DAILY và hiển thị options
+      setSelectedRentalType('DAILY')
+      setShowRentalOptions(true)
+      if (onUpdateType) {
+        onUpdateType(newType, 'DAILY')
+      }
+    }
+  }
+
+  const handleRentalTypeChange = (newRentalType) => {
+    setSelectedRentalType(newRentalType)
+    if (onUpdateRentalType) {
+      onUpdateRentalType(newRentalType)
+    }
+  }
+
+  const toggleRentalOptions = () => {
+    setShowRentalOptions(!showRentalOptions)
   }
 
   const getRentalTypeText = (type) => {
@@ -20,9 +63,22 @@ const CartItem = ({ item, onRemove, onUpdateQuantity, onToggleSelection }) => {
     }
   }
 
+  const getRentalPrice = () => {
+    switch (selectedRentalType) {
+      case 'DAILY':
+        return parseFloat(book?.rentPricePerDay || 0)
+      case 'WEEKLY':
+        return parseFloat(book?.rentPricePerWeek || 0)
+      case 'MONTHLY':
+        return parseFloat(book?.rentPricePerMonth || 0)
+      default:
+        return 0
+    }
+  }
+
   // Tính toán giá dựa trên loại giao dịch
   const { unitPrice, deposit, itemTotal, displayType } = useMemo(() => {
-    if (type === 'PURCHASE') {
+    if (selectedType === 'PURCHASE') {
       const price = parseFloat(book?.sellerPrice || 0)
       return {
         unitPrice: price,
@@ -30,11 +86,11 @@ const CartItem = ({ item, onRemove, onUpdateQuantity, onToggleSelection }) => {
         itemTotal: price * quantity,
         displayType: 'Mua'
       }
-    } else if (type === 'RENTAL') {
+    } else if (selectedType === 'RENTAL') {
       let price = 0
       let rentalText = ''
 
-      switch (rentalType) {
+      switch (selectedRentalType) {
         case 'DAILY':
           price = parseFloat(book?.rentPricePerDay || 0)
           rentalText = 'Thuê ngày'
@@ -67,7 +123,7 @@ const CartItem = ({ item, onRemove, onUpdateQuantity, onToggleSelection }) => {
       itemTotal: 0,
       displayType: 'Không xác định'
     }
-  }, [type, rentalType, book, quantity])
+  }, [selectedType, selectedRentalType, book, quantity])
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -94,8 +150,8 @@ const CartItem = ({ item, onRemove, onUpdateQuantity, onToggleSelection }) => {
         <div className="flex items-start pt-1">
           <input
             type="checkbox"
-            checked={isChecked || false}
-            onChange={onToggleSelection}
+            checked={!!isSelected}
+            onChange={(e) => handleCheckboxChange(e)}
             className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
           />
         </div>
@@ -154,24 +210,82 @@ const CartItem = ({ item, onRemove, onUpdateQuantity, onToggleSelection }) => {
             )}
           </div>
 
-          {/* Transaction Type */}
-          <div className="flex items-center gap-2 mb-4">
-            <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${type === 'PURCHASE'
-              ? 'bg-blue-100 text-blue-800'
-              : 'bg-green-100 text-green-800'
-              }`}>
-              {type === 'PURCHASE' ? (
-                <Package className="h-3 w-3" />
-              ) : (
-                <Calendar className="h-3 w-3" />
-              )}
-              {displayType}
-            </span>
+          {/* Transaction Type Selector */}
+          <div className="mb-4 space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
+                <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${selectedType === 'PURCHASE'
+                  ? 'bg-blue-100 text-blue-800'
+                  : 'bg-green-100 text-green-800'
+                  }`}>
+                  {selectedType === 'PURCHASE' ? (
+                    <Package className="h-3 w-3" />
+                  ) : (
+                    <Calendar className="h-3 w-3" />
+                  )}
+                  {displayType}
+                </span>
 
-            {type === 'RENTAL' && rentalType && (
-              <span className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">
-                {getRentalTypeText(rentalType)}
-              </span>
+                {/* Type Selector Button */}
+                <button
+                  onClick={() => handleTypeChange(selectedType === 'PURCHASE' ? 'RENTAL' : 'PURCHASE')}
+                  className="text-xs text-blue-600 hover:text-blue-800 underline"
+                >
+                  Chuyển sang {selectedType === 'PURCHASE' ? 'thuê' : 'mua'}
+                </button>
+              </div>
+            </div>
+
+            {/* Rental Options */}
+            {selectedType === 'RENTAL' && (
+              <div className="space-y-2">
+                <button
+                  onClick={toggleRentalOptions}
+                  className="flex items-center gap-1 text-xs text-gray-600 hover:text-gray-800"
+                >
+                  <ChevronDown className={`h-3 w-3 transition-transform ${showRentalOptions ? 'rotate-180' : ''}`} />
+                  {getRentalTypeText(selectedRentalType)} • {formatCurrency(getRentalPrice())}đ
+                  {book.rentDeposit > 0 && ` + ${formatCurrency(book.rentDeposit)}đ cọc`}
+                </button>
+
+                {showRentalOptions && (
+                  <div className="grid grid-cols-3 gap-2 p-2 bg-gray-50 rounded-lg">
+                    {['DAILY', 'WEEKLY', 'MONTHLY'].map((rentalOption) => {
+                      let price = 0
+                      switch (rentalOption) {
+                        case 'DAILY':
+                          price = parseFloat(book.rentPricePerDay || 0)
+                          break
+                        case 'WEEKLY':
+                          price = parseFloat(book.rentPricePerWeek || 0)
+                          break
+                        case 'MONTHLY':
+                          price = parseFloat(book.rentPricePerMonth || 0)
+                          break
+                      }
+
+                      return (
+                        <button
+                          key={rentalOption}
+                          onClick={() => handleRentalTypeChange(rentalOption)}
+                          className={`p-2 rounded text-xs text-center transition-colors ${selectedRentalType === rentalOption
+                            ? 'bg-blue-100 border border-blue-300 text-blue-700'
+                            : 'bg-white border border-gray-200 hover:bg-gray-50 text-gray-700'
+                            }`}
+                        >
+                          <div className="font-medium">{getRentalTypeText(rentalOption)}</div>
+                          <div className="font-semibold mt-1">{formatCurrency(price)}đ</div>
+                          {book.rentDeposit > 0 && (
+                            <div className="text-gray-500 text-xs mt-1">
+                              + {formatCurrency(book.rentDeposit)}đ cọc
+                            </div>
+                          )}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
             )}
           </div>
 
@@ -214,7 +328,7 @@ const CartItem = ({ item, onRemove, onUpdateQuantity, onToggleSelection }) => {
                 <span className="font-semibold text-gray-900">
                   {formatCurrency(unitPrice)}đ
                 </span>
-                {type === 'RENTAL' && deposit > 0 && (
+                {selectedType === 'RENTAL' && deposit > 0 && (
                   <span className="text-sm text-gray-500 ml-1">
                     (+{formatCurrency(deposit)}đ cọc)
                   </span>
@@ -237,7 +351,7 @@ const CartItem = ({ item, onRemove, onUpdateQuantity, onToggleSelection }) => {
           </div>
 
           {/* Additional Info for Rental */}
-          {type === 'RENTAL' && book.rentPenaltyPerDay && (
+          {selectedType === 'RENTAL' && book.rentPenaltyPerDay && (
             <div className="mt-3 pt-3 border-t border-gray-100">
               <p className="text-xs text-gray-500">
                 Phí phạt trễ: {formatCurrency(parseFloat(book.rentPenaltyPerDay))}đ/ngày

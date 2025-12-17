@@ -1,17 +1,32 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
-const PositionedBanner = ({ banners = [], position = 'Trang chủ' }) => {
-    const filteredBanners = banners
-        .filter(banner => banner.position === position && banner.status === 'active')
-        .sort((a, b) => a.order - b.order);
+const PositionedBanner = ({ banners = [] }) => {
 
-    if (filteredBanners.length === 0) {
+    const activeBanners = useMemo(() => {
+        const now = new Date();
+
+        return banners
+            .filter(banner => {
+                if (!banner.isActive) return false;
+
+                const start = banner.startDate ? new Date(banner.startDate) : null;
+                const end = banner.endDate ? new Date(banner.endDate) : null;
+
+                if (start && now < start) return false;
+                if (end && now > end) return false;
+
+                return true;
+            })
+            .sort((a, b) => a.sortOrder - b.sortOrder);
+    }, [banners]);
+
+    if (activeBanners.length === 0) {
         return null;
     }
 
     return (
         <div className="my-6">
-            {filteredBanners.map((banner) => (
+            {activeBanners.map(banner => (
                 <div key={banner.id} className="mb-4 last:mb-0">
                     <a
                         href={banner.link}
@@ -20,7 +35,7 @@ const PositionedBanner = ({ banners = [], position = 'Trang chủ' }) => {
                         rel="noopener noreferrer"
                     >
                         <img
-                            src={banner.image}
+                            src={banner.imageUrl.replace('minio:9000', 'localhost:9000')}
                             alt={banner.title}
                             className="w-full h-auto object-cover"
                         />

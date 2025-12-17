@@ -137,7 +137,7 @@ const CustomerSidebar = () => {
                         }`}
                 >
                     <Calendar className="w-5 h-5" />
-                    <span>Sách đã thuê</span>
+                    <span>Sách thuê</span>
                 </Link>
 
                 <Link

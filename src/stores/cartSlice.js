@@ -125,10 +125,20 @@ const cartSlice = createSlice({
             .addCase(updateCartItem.fulfilled, (state, action) => {
                 state.loading = false;
                 const updatedItem = action.payload;
+
+                console.log(updatedItem);
+
+
                 const index = state.items.findIndex(item => item.id === updatedItem.id);
 
                 if (index !== -1) {
-                    state.items[index] = updatedItem;
+                    let item = state.items[index];
+                    item.quantity = updatedItem.quantity;
+                    item.price = updatedItem.price;
+                    item.rentalType = updatedItem.rentalType;
+                    item.type = updatedItem.type;
+                    item.isSelected = updatedItem.isSelected;
+                    state.items[index] = item;
                     // Recalculate total if needed, or get from API response
                     state.total = action.payload.total || state.total;
                 }

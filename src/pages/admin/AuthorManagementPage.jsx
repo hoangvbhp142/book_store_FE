@@ -118,7 +118,7 @@ const AuthorManagementPage = () => {
     return (
         <div className="container mx-auto p-4 max-w-6xl bg-white">
             <div className="flex items-center justify-between mb-3">
-                <h2 className="text-lg font-semibold">Quản lý tác giả</h2>
+                <h1 className="text-2xl font-bold text-gray-900">Quản Lý Tác Giả</h1>
                 <button
                     onClick={() => openAddModal(null)}
                     className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"

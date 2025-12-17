@@ -10,6 +10,7 @@ import { buildTree } from '../app/utils';
 import BookList from '../components/BookList';
 import FeaturedBook from '../components/FeaturedBook';
 import PositionedBanner from '../components/PositionedBanner';
+import bannerApi from '../api/bannerApi';
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -21,12 +22,95 @@ const Home = () => {
   const [kidsBooks, setKidsBooks] = useState([]);
   const [newBooks, setNewBooks] = useState([]);
 
+  const [homeMainBanners, setHomeMainBanners] = useState([]);
+  const [homeSubBanners, setHomeSubBanners] = useState([]);
+  const [homeMiddleBanners, setHomeMiddleBanners] = useState([]);
+  const [homeBottomBanners, setHomeBottomBanners] = useState([]);
+
+  const [sidebarTopBanners, setSidebarTopBanners] = useState([]);
+  const [sidebarBottomBanners, setSidebarBottomBanners] = useState([]);
+
+  const [categoryHeaderBanners, setCategoryHeaderBanners] = useState([]);
+  const [productDetailBanners, setProductDetailBanners] = useState([]);
+  const [cartBanners, setCartBanners] = useState([]);
+
+
   const fetchBookByCategory = (categoryName, setter) => {
     const filteredBooks = bookList.filter(book =>
       book.bookCategories.some(category => category.category.name === categoryName)
     );
     setter(filteredBooks);
   }
+
+  const fetchBanner = async () => {
+    try {
+      const response = await bannerApi.getAll();
+
+      const homeMain = [];
+      const homeSub = [];
+      const homeMiddle = [];
+      const homeBottom = [];
+
+      const sidebarTop = [];
+      const sidebarBottom = [];
+
+      const categoryHeader = [];
+      const productDetail = [];
+      const cart = [];
+
+      response.data.forEach(banner => {
+        switch (banner.position) {
+          case 'HOME_MAIN':
+            homeMain.push(banner);
+            break;
+          case 'HOME_SUB':
+            homeSub.push(banner);
+            break;
+          case 'HOME_MIDDLE':
+            homeMiddle.push(banner);
+            break;
+          case 'HOME_BOTTOM':
+            homeBottom.push(banner);
+            break;
+
+          case 'SIDEBAR_TOP':
+            sidebarTop.push(banner);
+            break;
+          case 'SIDEBAR_BOTTOM':
+            sidebarBottom.push(banner);
+            break;
+
+          case 'CATEGORY_HEADER':
+            categoryHeader.push(banner);
+            break;
+          case 'PRODUCT_DETAIL':
+            productDetail.push(banner);
+            break;
+          case 'CART':
+            cart.push(banner);
+            break;
+
+          default:
+            break;
+        }
+      });
+
+      setHomeMainBanners(homeMain);
+      setHomeSubBanners(homeSub);
+      setHomeMiddleBanners(homeMiddle);
+      setHomeBottomBanners(homeBottom);
+
+      setSidebarTopBanners(sidebarTop);
+      setSidebarBottomBanners(sidebarBottom);
+
+      setCategoryHeaderBanners(categoryHeader);
+      setProductDetailBanners(productDetail);
+      setCartBanners(cart);
+
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const fetchBookList = () => {
     const finalParams = {
@@ -47,6 +131,7 @@ const Home = () => {
   useEffect(() => {
     fetchBookList();
     fetchCategoryList();
+    fetchBanner();
 
     console.log(bookList);
 
@@ -76,7 +161,7 @@ const Home = () => {
   // Giả sử chúng ta lấy cuốn sách đầu tiên trong bookList làm sách nổi bật
   const featuredBook = bookList[0] || {};
 
-  console.log(bookList);
+  console.log(homeSubBanners);
 
 
   return (
@@ -89,7 +174,7 @@ const Home = () => {
             <div className="md:col-span-1 space-y-3">
               <SimpleFilterSidebar categories={buildTree(categoryList)} />
               <div className="hidden md:block">
-                <PositionedBanner banners={banners} />
+                <PositionedBanner banners={sidebarTopBanners} />
                 <FeaturedBook bookList={bookList} />
               </div>
 
@@ -97,10 +182,10 @@ const Home = () => {
 
             {/* --- Featured Book --- */}
             <div className="md:col-span-3">
-              <BannerCarousel banners={banners} />
+              <BannerCarousel banners={homeMainBanners} />
 
               <div className='mt-4'>
-                <BannerGrid banners={banners} position='Trang chủ' />
+                <BannerGrid banners={homeSubBanners} />
               </div>
 
               <h2 className="text-2xl font-medium p-3">Sách Nổi Bật</h2>
@@ -109,7 +194,7 @@ const Home = () => {
               </div>
 
               <div className='mt-4 mb-4'>
-                <BannerGrid banners={banners} position='Danh mục' />
+                <BannerGrid banners={homeMiddleBanners} />
               </div>
 
               <h2 className="text-2xl font-medium p-3">Sách thiếu nhi</h2>

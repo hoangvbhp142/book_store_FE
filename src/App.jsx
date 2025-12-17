@@ -34,7 +34,7 @@ import TextEditor from './components/TextEditor'
 import PolicyPage from './pages/admin/PolicyPage'
 import PolicyDetail from './pages/PolicyDetail'
 import PolicyDisplayPage from './pages/PolicyDisplayPage'
-import { RentedBooksPage } from './pages/RentedBooksPage'
+import RentedBooksPage from './pages/RentedBooksPage'
 import ProtectedAdminRoutes from './routes/ProtectedAdminRoutes'
 import ProtectedCustomerRoutes from './routes/ProtectedCustomerRoutes'
 import { ToastContainer } from 'react-toastify';
@@ -50,6 +50,7 @@ import ChatBubble from './components/ChatBubble'
 import BannerManagementPage from './pages/admin/BannerManagementPage'
 import AdminOrderDetail from './pages/admin/AdminOrderDetail'
 import AnnouncementPopup from './components/AnnouncementPopup'
+import ReturnOrderManagement from './pages/admin/ReturnOrderManagement'
 
 function App() {
   return (
@@ -94,6 +95,7 @@ function App() {
               <Route path='/admin/orders' element={<AdminOrdersPage />} />
               <Route path='/admin/orders/:id' element={<AdminOrderDetail />} />
               <Route path='/admin/rentals' element={<AdminRentalsPage />} />
+              <Route path='/admin/returns' element={<ReturnOrderManagement />} />
               <Route path='/admin/books' element={<AdminBooksPage />} />
               <Route path='/admin/categories' element={<AdminCategoriesPage />} />
               <Route path='/admin/authors' element={<AuthorManagementPage />} />
