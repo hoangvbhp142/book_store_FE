@@ -98,6 +98,12 @@ const formatDateOnly = (dateString) => {
     return date.toLocaleDateString('vi-VN');
 };
 
+// Hàm rút gọn ID để hiển thị
+const shortenId = (id) => {
+    if (!id) return 'N/A';
+    return id.substring(0, 20) + '...';
+};
+
 const utils = {
     formatCurrency,
     handleApiError,
@@ -105,8 +111,9 @@ const utils = {
     addNodeToTree,
     getDiff,
     formatDateOnly,
-    formatDate
+    formatDate,
+    shortenId
 }
 
-export { formatCurrency, handleApiError, buildTree, addNodeToTree, getDiff, formatDateOnly, formatDate }
+export { formatCurrency, handleApiError, buildTree, addNodeToTree, getDiff, formatDateOnly, formatDate, shortenId }
 export default utils;

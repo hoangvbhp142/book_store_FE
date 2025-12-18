@@ -12,13 +12,6 @@ const BannerCarousel = ({ banners = [] }) => {
 
         return banners.filter(banner => {
             if (!banner.isActive) return false;
-
-            const start = banner.startDate ? new Date(banner.startDate) : null;
-            const end = banner.endDate ? new Date(banner.endDate) : null;
-
-            if (start && now < start) return false;
-            if (end && now > end) return false;
-
             return true;
         });
     }, [banners]);

@@ -641,7 +641,7 @@ const OrderDetailPage = () => {
                                 {(order.status === 'PROCESSING' ||
                                     order.status === 'WAIT_FOR_DELIVERY' ||
                                     order.status === 'PENDING' ||
-                                    (order.shipping.status === 'DELIVERED' && order.rentalItems?.length > 0)) && (
+                                    (order.shipping && order.shipping.status === 'DELIVERED' && order.rentalItems?.length > 0)) && (
                                         <div className="pt-4 border-t border-gray-200 space-y-2">
                                             {(order.status === 'PROCESSING' || order.status === 'WAIT_FOR_DELIVERY' || order.status === 'PENDING') && (
                                                 <button
@@ -657,7 +657,7 @@ const OrderDetailPage = () => {
                                                 </button>
                                             )}
 
-                                            {order.shipping.status === 'DELIVERED' && order.rentalItems?.length > 0 && (
+                                            {order.shipping && order.shipping.status === 'DELIVERED' && order.rentalItems?.length > 0 && (
                                                 <button
                                                     onClick={() => handleReturnBook(order.rentalItems[0].book)}
                                                     className="w-full px-4 py-2 border border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-sm font-medium flex items-center justify-center gap-2"
