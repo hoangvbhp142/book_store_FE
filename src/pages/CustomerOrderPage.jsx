@@ -55,7 +55,11 @@ const CustomerOrderPage = () => {
     };
 
     // Lấy màu và text cho trạng thái
-    const getStatusInfo = (status) => {
+    const getStatusInfo = (order) => {
+        const status = order.shipping ? order.shipping.status : order.status;
+        console.log(order.id, status);
+
+
         switch (status) {
             case 'PROCESSING':
                 return { text: 'Đang xử lý', color: 'bg-yellow-100 text-yellow-800 border-yellow-200' };
@@ -63,13 +67,11 @@ const CustomerOrderPage = () => {
                 return { text: 'Chờ xác nhận', color: 'bg-orange-100 text-orange-800 border-orange-200' };
             case 'PAYING':
                 return { text: 'Đang thanh toán', color: 'bg-blue-100 text-blue-800 border-blue-200' };
-            case 'SHIPPED':
-            case 'DELIVERING':
+            case 'SHIPPING':
                 return { text: 'Đang giao hàng', color: 'bg-green-100 text-green-800 border-green-200' };
-            case 'COMPLETED':
             case 'DELIVERED':
                 return { text: 'Đã giao hàng', color: 'bg-emerald-100 text-emerald-800 border-emerald-200' };
-            case 'CANCELLED':
+            case 'CANCEL':
                 return { text: 'Đã hủy', color: 'bg-red-100 text-red-800 border-red-200' };
             case 'FAILED':
                 return { text: 'Thất bại', color: 'bg-red-100 text-red-800 border-red-200' };
@@ -194,7 +196,7 @@ const CustomerOrderPage = () => {
                                 </thead>
                                 <tbody className="divide-y divide-gray-200">
                                     {orders.map((order) => {
-                                        const statusInfo = getStatusInfo(order.status);
+                                        const statusInfo = getStatusInfo(order);
                                         const orderTypeInfo = getOrderTypeInfo(order);
                                         const totalItems = getTotalItems(order);
 

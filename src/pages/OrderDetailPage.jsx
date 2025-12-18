@@ -105,7 +105,10 @@ const OrderDetailPage = () => {
         }
     };
 
-    const getStatusInfo = (status) => {
+    const getStatusInfo = (order) => {
+
+        const status = order.shipping ? order.shipping.status : order.status;
+
         switch (status) {
             case "PROCESSING":
                 return {
@@ -139,7 +142,16 @@ const OrderDetailPage = () => {
                     icon: <Truck className="h-5 w-5" />,
                     badgeClass: 'bg-blue-100 text-blue-800 border-blue-200',
                 };
-
+            case 'DELIVERED':
+                return {
+                    text: 'Đã giao hàng',
+                    description: 'Đơn hàng đã được giao thành công',
+                    color: ' text-emerald-800',
+                    bgColor: 'bg-emerald-100',
+                    borderColor: 'border-emerald-200',
+                    icon: <CheckCircle className="h-5 w-5" />,
+                    badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+                };
             case "PAYMENT_ERROR":
                 return {
                     text: 'Lỗi thanh toán',
@@ -305,7 +317,7 @@ const OrderDetailPage = () => {
         );
     }
 
-    const statusInfo = getStatusInfo(order.status);
+    const statusInfo = getStatusInfo(order);
     const paymentStatusInfo = getPaymentStatusInfo(order.payment?.status);
     const totalItems = (order.orderItems?.length || 0) + (order.rentalItems?.length || 0);
     const rentalDays = calculateRentalDays(order.rentStart, order.rentDue);
