@@ -73,6 +73,8 @@ const Cart = () => {
     };
   }, [items]);
 
+  const canNavigate = selectedItems.length > 0;
+
   const tax = subtotal * 0.08;
   const shipping = selectedShippingMethod === 'standard' ? 0 :
     selectedShippingMethod === 'express' ? 30000 : 50000;
@@ -396,7 +398,13 @@ const Cart = () => {
                   {/* Checkout Button */}
                   <Link
                     to="/checkout"
-                    className="block w-full bg-blue-600 text-white py-3 rounded-lg text-center font-semibold hover:bg-blue-700 transition-colors mb-4 shadow-md hover:shadow-lg"
+                    onClick={(e) => {
+                      if (!canNavigate) {
+                        e.preventDefault();
+                        toast.error('Vui lòng chọn ít nhất một sản phẩm để tiếp tục thanh toán');
+                      }
+                    }}
+                    className={`block w-full bg-blue-600 text-white py-3 rounded-lg text-center font-semibold hover:bg-blue-700 transition-colors mb-4 shadow-md hover:shadow-lg ${canNavigate ? '' : 'cursor-not-allowed opacity-50'}`}
                   >
                     Tiến hành thanh toán
                   </Link>
