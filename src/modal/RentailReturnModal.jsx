@@ -1,17 +1,38 @@
 import { AlertCircle, Ban, Book, CheckCircle, Clock, MessageSquare, Package, User, X } from 'lucide-react';
-import React from 'react'
+import React, { useState } from 'react'
 import { formatCurrency, formatDate, formatDateOnly } from '../app/utils';
+import { toast } from 'react-toastify';
 
 const RentailReturnModal = ({
     selectedOrder,
     onClose,
     getStatusConfig,
-    acceptReturnRequest
+    acceptReturnRequest,
+    completeReturnRequest,
 }) => {
 
-    console.log(selectedOrder);
+    const [formData, setFormData] = useState({
+        status: "COMPLETED",
+        adminNote: "",
+        receivedAt: new Date().toISOString(),
+        rentalItems: []
+    })
 
-    const order = selectedOrder.order || null;
+    const [rentalItems, setRentalItems] = useState(selectedOrder.rentalItems.map(item => ({
+        id: item.id,
+        returnQuantity: item.returnQuantity || 0,
+        penalty: item.penalty || 0
+    })));
+
+    const completeRequest = () => {
+        if (rentalItems.some(ri => ri.returnQuantity === 0)) {
+            toast.error('Vui lòng nhập số lượng trả cho tất cả các mục thuê.');
+            return;
+        }
+        formData.rentalItems = rentalItems;
+        console.log(formData);
+        completeReturnRequest(selectedOrder.id, { status: 'COMPLETED' });
+    }
 
     const getItemStatusConfig = (status) => {
         const configs = {
@@ -222,12 +243,17 @@ const RentailReturnModal = ({
                                                             type="number"
                                                             min="0"
                                                             max={item.quantity}
+                                                            name='returnQuantity'
+                                                            defaultValue={0}
                                                             className="w-20 border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-center"
                                                             placeholder="0"
-                                                            defaultValue={0}
                                                             onChange={(e) => {
                                                                 const returnedQty = parseInt(e.target.value) || 0;
-                                                                console.log(`Cập nhật số lượng trả cho sách ${item.bookId}: ${returnedQty}`);
+                                                                setRentalItems(prevItems => prevItems.map(ri => {
+                                                                    if (ri.id === item.id) {
+                                                                        return { ...ri, returnQuantity: returnedQty };
+                                                                    }
+                                                                }))
                                                             }}
                                                         />
                                                     </div>
@@ -248,6 +274,14 @@ const RentailReturnModal = ({
                                                             className="w-32 border border-gray-300 rounded-lg px-3 py-1.5 text-sm"
                                                             placeholder="Phí (VNĐ)"
                                                             defaultValue={penaltyFee}
+                                                            onChange={(e) => {
+                                                                const penalty = parseInt(e.target.value) || 0;
+                                                                setRentalItems(prevItems => prevItems.map(ri => {
+                                                                    if (ri.id === item.id) {
+                                                                        return { ...ri, penalty: penalty };
+                                                                    }
+                                                                }))
+                                                            }}
                                                         />
                                                     </div>
                                                 </div>
@@ -318,7 +352,8 @@ const RentailReturnModal = ({
                                             className="w-full h-32 border border-gray-300 rounded-lg p-3 text-sm"
                                             placeholder="Thêm ghi chú..."
                                             defaultValue={selectedOrder.adminNote || ''}
-                                            onChange={(e) => console.log('Update admin note:', e.target.value)}
+                                            name='adminNote'
+                                            onChange={(e) => setFormData({ ...formData, adminNote: e.target.value })}
                                         />
                                     </div>
                                 </div>
@@ -369,7 +404,7 @@ const RentailReturnModal = ({
                                     </div>
                                     <div className="pt-3 border-t border-blue-200">
                                         <button
-                                            onClick={() => handleUpdateStatus(selectedOrder.id, 'COMPLETED')}
+                                            onClick={() => completeRequest()}
                                             className="w-full py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
                                         >
                                             Hoàn tất xử lý

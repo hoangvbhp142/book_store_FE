@@ -15,7 +15,8 @@ import {
   UserPen,
   Building,
   Ticket,
-  Image
+  Image,
+  Calendar
 } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { logoutState } from '../stores/authSlice';
@@ -36,7 +37,7 @@ const AdminSidebar = () => {
     // { url: "/admin/vouchers", label: "Quản lý voucher", index: 6, icon: <Ticket className="h-5 w-5" /> },
     { url: "/admin/orders", label: "Quản lý đơn hàng", index: 7, icon: <Package className="h-5 w-5" /> },
     { url: "/admin/rentals", label: "Quản lý sách thuê", index: 8, icon: <Clock className="h-5 w-5" /> },
-    { url: "/admin/returns", label: "Quản lý yêu cầu trả sách", index: 12, icon: <Clock className="h-5 w-5" /> },
+    { url: "/admin/returns", label: "Quản lý yêu cầu trả sách", index: 12, icon: <Calendar className="h-5 w-5" /> },
     { url: "/admin/users", label: "Quản lý người dùng", index: 9, icon: <Users className="h-5 w-5" /> },
     { url: "/admin/policies", label: "Quản lý chính sách", index: 10, icon: <FileText className="h-5 w-5" /> },
     { url: "/admin/banners", label: "Quản lý banner", index: 11, icon: <Image className="h-5 w-5" /> },

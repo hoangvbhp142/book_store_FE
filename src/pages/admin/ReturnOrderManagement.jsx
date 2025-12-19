@@ -1,4 +1,4 @@
-import { Eye, Search, Filter, CheckCircle, Clock, Package, Ban, AlertCircle, ChevronDown, User, Book, MessageSquare, X } from 'lucide-react';
+import { Eye, Search, Filter, CheckCircle, Clock, Package, Ban, AlertCircle, ChevronDown, User, Book, MessageSquare, X, ShieldCheck, Truck, PackageCheck } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import adminRentalApi from '../../api/adminRentalApi';
@@ -25,35 +25,46 @@ const ReturnOrderManagement = () => {
 
     const getStatusConfig = (status) => {
         const configs = {
-            pending: {
+            PENDING: {
                 color: 'bg-yellow-100 text-yellow-800 border border-yellow-200',
                 icon: <Clock className="w-4 h-4" />,
-                text: 'Chờ xử lý',
+                text: 'Chờ gửi sách',
                 bgColor: 'bg-yellow-50'
             },
-            processing: {
+            APPROVAL: {
+                color: 'bg-purple-100 text-purple-800 border border-purple-200',
+                icon: <ShieldCheck className="w-4 h-4" />,
+                text: 'Đã duyệt',
+                bgColor: 'bg-purple-50'
+            },
+            IN_TRANSIT: {
                 color: 'bg-blue-100 text-blue-800 border border-blue-200',
-                icon: <Package className="w-4 h-4" />,
-                text: 'Đang xử lý',
+                icon: <Truck className="w-4 h-4" />,
+                text: 'Đang vận chuyển',
                 bgColor: 'bg-blue-50'
             },
-            completed: {
+            RECEIVED: {
+                color: 'bg-indigo-100 text-indigo-800 border border-indigo-200',
+                icon: <PackageCheck className="w-4 h-4" />,
+                text: 'Kho đã nhận',
+                bgColor: 'bg-indigo-50'
+            },
+            COMPLETED: {
                 color: 'bg-green-100 text-green-800 border border-green-200',
                 icon: <CheckCircle className="w-4 h-4" />,
-                text: 'Hoàn thành',
+                text: 'Hoàn tất',
                 bgColor: 'bg-green-50'
             },
-            rejected: {
+            CANCELLED: {
                 color: 'bg-red-100 text-red-800 border border-red-200',
                 icon: <Ban className="w-4 h-4" />,
-                text: 'Từ chối',
+                text: 'Đã hủy',
                 bgColor: 'bg-red-50'
             }
         };
-        return configs[status] || configs.pending;
+
+        return configs[status] || configs.PENDING;
     };
-
-
 
     // Tính toán thống kê
     const stats = {
@@ -68,13 +79,25 @@ const ReturnOrderManagement = () => {
     const acceptReturnRequest = async (requestId) => {
         try {
             const response = await adminRentalApi.approveReturn(requestId, {
-                status: 'IN_TRANSIT'
+                status: 'APPROVAL'
             });
             console.log(response);
             toast.success('Yêu cầu trả sách đã được chấp nhận thành công.');
         } catch (error) {
             console.log(error);
             toast.error(error?.response?.data?.message || 'Đã có lỗi xảy ra khi chấp nhận yêu cầu trả sách.');
+            return;
+        }
+    }
+
+    const completeReturnRequest = async (requestId, data) => {
+        try {
+            const response = await adminRentalApi.approveReturn(requestId, data);
+            console.log(response);
+            toast.success('Yêu cầu trả sách đã được hoàn tất thành công.');
+        } catch (error) {
+            console.log(error);
+            toast.error(error?.response?.data?.message || 'Đã có lỗi xảy ra khi hoàn tất yêu cầu trả sách.');
             return;
         }
     }
@@ -309,6 +332,7 @@ const ReturnOrderManagement = () => {
                         onClose={() => setShowModal(false)}
                         getStatusConfig={getStatusConfig}
                         acceptReturnRequest={acceptReturnRequest}
+                        completeReturnRequest={completeReturnRequest}
                     />
                 )}
             </div>

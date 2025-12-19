@@ -56,13 +56,13 @@ const AdminDashboard = () => {
                 ]);
 
                 console.log('API Responses:', {
-                    user: userRes.data,
-                    book: bookRes.data,
-                    order: orderRes.data,
-                    revenue: revenueRes.data,
-                    topPurchase: topPurchaseRes.data,
-                    topRental: topRentalRes.data,
-                    topBook: topBookRes.data
+                    user: userRes,
+                    book: bookRes,
+                    order: orderRes,
+                    revenue: revenueRes,
+                    topPurchase: topPurchaseRes,
+                    topRental: topRentalRes,
+                    topBook: topBookRes
                 });
 
                 // Xử lý dữ liệu stats
@@ -80,21 +80,21 @@ const AdminDashboard = () => {
                     },
                     {
                         title: "Tổng đơn hàng",
-                        value: orderRes.data.totalOrder || "0",
+                        value: orderRes.totalOrder || "0",
                         change: "+0%", // Không có dữ liệu để tính phần trăm
                         trend: "neutral",
                         icon: ShoppingBag,
                     },
                     {
                         title: "Tổng số sách",
-                        value: bookRes.data.totalBook || "0",
+                        value: bookRes.totalBook || "0",
                         change: "+0%",
                         trend: "neutral",
                         icon: BookOpen,
                     },
                     {
                         title: "Tổng người dùng",
-                        value: userRes.data.total || "0",
+                        value: userRes.total || "0",
                         change: "+0%",
                         trend: "neutral",
                         icon: Users,
@@ -102,8 +102,8 @@ const AdminDashboard = () => {
                 ]);
 
                 // Xử lý dữ liệu doanh thu
-                if (revenueRes.data && Array.isArray(revenueRes.data)) {
-                    const formattedRevenue = revenueRes.data.map(item => ({
+                if (revenueRes && Array.isArray(revenueRes)) {
+                    const formattedRevenue = revenueRes.map(item => ({
                         month: `T${item.month}`,
                         revenue: item.revenue || 0
                     }));
@@ -111,17 +111,17 @@ const AdminDashboard = () => {
                 }
 
                 // Xử lý top sách
-                setTopPurchase(topPurchaseRes.data || []);
-                setTopRental(topRentalRes.data || []);
+                setTopPurchase(topPurchaseRes || []);
+                setTopRental(topRentalRes || []);
 
                 // Nếu topBookRes.data có dữ liệu, sử dụng nó
-                if (topBookRes.data && topBookRes.data.length > 0) {
-                    setTopBooks(topBookRes.data.slice(0, 10));
+                if (topBookRes && topBookRes.length > 0) {
+                    setTopBooks(topBookRes.slice(0, 10));
                 } else {
                     // Nếu không, kết hợp dữ liệu từ topPurchase và topRental
                     const combinedBooks = combineBookData(
-                        topPurchaseRes.data || [],
-                        topRentalRes.data || []
+                        topPurchaseRes || [],
+                        topRentalRes || []
                     );
                     setTopBooks(combinedBooks);
                 }

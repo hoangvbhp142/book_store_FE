@@ -19,7 +19,7 @@ const ReturnOrder = ({ returnOrders }) => {
                 color: 'bg-blue-50 text-blue-700 border border-blue-200',
                 icon: <Package className="w-4 h-4" />,
                 text: 'Đang xử lý',
-                description: 'Thư viện đang kiểm tra sách'
+                description: 'Cửa hàng đang kiểm tra sách'
             },
             completed: {
                 color: 'bg-green-50 text-green-700 border border-green-200',
@@ -166,7 +166,7 @@ const ReturnOrder = ({ returnOrders }) => {
                                                     <span className="text-gray-600">Hình thức:</span>
                                                     <span className="font-medium">
                                                         {order.shippingMethod === 'SHOP_DELIVERY'
-                                                            ? 'Gửi về thư viện'
+                                                            ? 'Gửi về cửa hàng'
                                                             : 'Khác'}
                                                     </span>
                                                 </div>
@@ -206,7 +206,7 @@ const ReturnOrder = ({ returnOrders }) => {
                                         {/* Admin note */}
                                         <div>
                                             <h4 className="text-sm font-medium text-gray-500 mb-3">
-                                                Phản hồi từ thư viện
+                                                Phản hồi từ cửa hàng
                                             </h4>
                                             <div className="bg-blue-50 p-3 rounded-lg min-h-[80px]">
                                                 {order.adminNote ? (
@@ -305,7 +305,7 @@ const ReturnOrder = ({ returnOrders }) => {
                                                 </div>
                                             </div>
                                             <div>
-                                                <p className="text-sm text-gray-500 mb-1">Phản hồi từ thư viện:</p>
+                                                <p className="text-sm text-gray-500 mb-1">Phản hồi từ cửa hàng:</p>
                                                 <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
                                                     <p className="text-blue-700">
                                                         {selectedOrder.adminNote || 'Chưa có phản hồi'}
