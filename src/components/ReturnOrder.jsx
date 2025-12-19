@@ -1,5 +1,7 @@
 import { Eye, Clock, Package, CheckCircle, Ban, Calendar, MessageSquare } from 'lucide-react';
 import React, { useState } from 'react';
+import { formatCurrency, formatDate, formatDateOnly } from '../app/utils';
+import rentalReturnApi from '../api/rentalReturnApi';
 
 const ReturnOrder = ({ returnOrders }) => {
     const [selectedOrder, setSelectedOrder] = useState(null);
@@ -56,20 +58,43 @@ const ReturnOrder = ({ returnOrders }) => {
         return configs[status] || configs.waiting;
     };
 
-    const handleViewDetails = (order) => {
-        setSelectedOrder(order);
-        setShowModal(true);
-    };
+    const getRentalFee = (order, item) => {
+        switch (order.rentalType) {
+            case 'DAILY':
+                return item.book.rentPricePerDay;
+            case 'WEEKLY':
+                return item.book.rentPricePerWeek;
+            case 'MONTHLY':
+                return item.book.rentPricePerMonth;
+            default:
+                return 0;
+        }
+    }
 
-    // Tính tổng số sách theo trạng thái
-    const countBooksByStatus = (order) => {
-        const counts = {
-            total: order.items.length,
-            received: order.items.filter(item => item.itemStatus === 'received').length,
-            waiting: order.items.filter(item => item.itemStatus === 'waiting').length,
-            rejected: order.items.filter(item => item.itemStatus === 'rejected').length
-        };
-        return counts;
+    const getRentalType = (order) => {
+        switch (order.rentalType) {
+            case 'DAILY':
+                return 'Theo ngày';
+            case 'WEEKLY':
+                return 'Theo tuần';
+            case 'MONTHLY':
+                return 'Theo tháng';
+            default:
+                return '';
+        }
+    }
+
+    const handleViewDetails = async (order) => {
+        try {
+            const response = await rentalReturnApi.getById(order.id);
+            setSelectedOrder(response);
+            setShowModal(true);
+            console.log(response);
+
+        } catch (error) {
+            console.log(error);
+            toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra khi tải dữ liệu");
+        }
     };
 
     return (
@@ -79,30 +104,40 @@ const ReturnOrder = ({ returnOrders }) => {
                 <div className="space-y-6">
                     {returnOrders.map((order) => {
                         const statusConfig = getStatusConfig(order.status);
-                        const bookCounts = countBooksByStatus(order);
 
                         return (
-                            <div key={order.orderId} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                                {/* Order Header */}
+                            <div
+                                key={order.id}
+                                className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+                            >
+                                {/* Header */}
                                 <div className="p-6 border-b border-gray-200">
                                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                         <div>
                                             <div className="flex items-center gap-3 mb-2">
-                                                <h3 className="text-lg font-semibold text-gray-900">{order.orderId}</h3>
-                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusConfig.color}`}>
+                                                <h3 className="text-lg font-semibold text-gray-900">
+                                                    Yêu cầu trả sách #{order.id.slice(0, 8)}
+                                                </h3>
+
+                                                <span
+                                                    className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusConfig.color}`}
+                                                >
                                                     {statusConfig.icon}
                                                     <span className="ml-1.5">{statusConfig.text}</span>
                                                 </span>
                                             </div>
-                                            <div className="flex items-center text-sm text-gray-500">
-                                                <Calendar className="w-4 h-4 mr-1" />
-                                                <span>Yêu cầu ngày: {order.requestDate}</span>
-                                                {order.processedDate && (
-                                                    <>
-                                                        <span className="mx-2">•</span>
-                                                        <CheckCircle className="w-4 h-4 mr-1" />
-                                                        <span>Xử lý ngày: {order.processedDate}</span>
-                                                    </>
+
+                                            <div className="flex items-center text-sm text-gray-500 flex-wrap gap-2">
+                                                <div className="flex items-center">
+                                                    <Calendar className="w-4 h-4 mr-1" />
+                                                    <span>Gửi ngày: {formatDate(order.createdAt)}</span>
+                                                </div>
+
+                                                {order.receivedAt && (
+                                                    <div className="flex items-center">
+                                                        <CheckCircle className="w-4 h-4 mr-1 text-green-600" />
+                                                        <span>Shop đã nhận: {formatDate(order.receivedAt)}</span>
+                                                    </div>
                                                 )}
                                             </div>
                                         </div>
@@ -117,57 +152,79 @@ const ReturnOrder = ({ returnOrders }) => {
                                     </div>
                                 </div>
 
-                                {/* Order Summary */}
+                                {/* Body */}
                                 <div className="p-6">
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                        {/* Books Summary */}
+                                        {/* Books */}
                                         <div>
-                                            <h4 className="text-sm font-medium text-gray-500 mb-3">Tóm tắt sách</h4>
+                                            <h4 className="text-sm font-medium text-gray-500 mb-3">
+                                                Thông tin sách
+                                            </h4>
+
                                             <div className="space-y-2">
                                                 <div className="flex justify-between">
-                                                    <span className="text-gray-600">Tổng số sách:</span>
-                                                    <span className="font-semibold">{bookCounts.total} quyển</span>
+                                                    <span className="text-gray-600">Hình thức:</span>
+                                                    <span className="font-medium">
+                                                        {order.shippingMethod === 'SHOP_DELIVERY'
+                                                            ? 'Gửi về thư viện'
+                                                            : 'Khác'}
+                                                    </span>
                                                 </div>
+
                                                 <div className="flex justify-between">
-                                                    <span className="text-gray-600">Đã nhận:</span>
-                                                    <span className="font-semibold text-green-600">{bookCounts.received} quyển</span>
-                                                </div>
-                                                <div className="flex justify-between">
-                                                    <span className="text-gray-600">Chờ xử lý:</span>
-                                                    <span className="font-semibold text-yellow-600">{bookCounts.waiting} quyển</span>
+                                                    <span className="text-gray-600">Hoàn tiền:</span>
+                                                    <span
+                                                        className={`font-semibold ${Number(order.refundAmount) > 0
+                                                            ? 'text-green-600'
+                                                            : 'text-gray-400'
+                                                            }`}
+                                                    >
+                                                        {isNaN(Number(order.refundAmount))
+                                                            ? 'Đang xử lý'
+                                                            : formatCurrency(order.refundAmount)}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        {/* User Note */}
+                                        {/* Customer note */}
                                         <div>
-                                            <h4 className="text-sm font-medium text-gray-500 mb-3">Ghi chú của bạn</h4>
-                                            <div className="bg-gray-50 p-3 rounded-lg">
-                                                {order.noteFromUser ? (
-                                                    <p className="text-gray-700">{order.noteFromUser}</p>
+                                            <h4 className="text-sm font-medium text-gray-500 mb-3">
+                                                Ghi chú của bạn
+                                            </h4>
+                                            <div className="bg-gray-50 p-3 rounded-lg min-h-[80px]">
+                                                {order.customerNote ? (
+                                                    <p className="text-gray-700">{order.customerNote}</p>
                                                 ) : (
-                                                    <p className="text-gray-400 italic">Không có ghi chú</p>
+                                                    <p className="text-gray-400 italic">
+                                                        Không có ghi chú
+                                                    </p>
                                                 )}
                                             </div>
                                         </div>
 
-                                        {/* Admin Response */}
+                                        {/* Admin note */}
                                         <div>
-                                            <h4 className="text-sm font-medium text-gray-500 mb-3">Phản hồi từ thư viện</h4>
-                                            <div className="bg-blue-50 p-3 rounded-lg">
-                                                {order.noteFromAdmin ? (
+                                            <h4 className="text-sm font-medium text-gray-500 mb-3">
+                                                Phản hồi từ thư viện
+                                            </h4>
+                                            <div className="bg-blue-50 p-3 rounded-lg min-h-[80px]">
+                                                {order.adminNote ? (
                                                     <div className="flex items-start">
-                                                        <MessageSquare className="w-4 h-4 text-blue-500 mt-0.5 mr-2 flex-shrink-0" />
-                                                        <p className="text-blue-700">{order.noteFromAdmin}</p>
+                                                        <MessageSquare className="w-4 h-4 text-blue-500 mt-0.5 mr-2" />
+                                                        <p className="text-blue-700">{order.adminNote}</p>
                                                     </div>
                                                 ) : (
-                                                    <p className="text-blue-400 italic">Đang chờ phản hồi...</p>
+                                                    <p className="text-blue-400 italic">
+                                                        Chưa có phản hồi
+                                                    </p>
                                                 )}
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+
                         );
                     })}
                 </div>
@@ -212,11 +269,15 @@ const ReturnOrder = ({ returnOrders }) => {
                                         <div className="space-y-2">
                                             <div className="flex justify-between">
                                                 <span className="text-gray-600">Mã yêu cầu:</span>
-                                                <span className="font-medium">{selectedOrder.orderId}</span>
+                                                <span className="font-medium">{selectedOrder.id}</span>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span className="text-gray-600">Ngày yêu cầu:</span>
-                                                <span className="font-medium">{selectedOrder.requestDate}</span>
+                                                <span className="font-medium">{formatDate(selectedOrder.createdAt)}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-600">Loại thuê:</span>
+                                                <span className="font-medium">{getRentalType(selectedOrder.order)}</span>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span className="text-gray-600">Trạng thái:</span>
@@ -240,14 +301,14 @@ const ReturnOrder = ({ returnOrders }) => {
                                             <div>
                                                 <p className="text-sm text-gray-500 mb-1">Ghi chú của bạn:</p>
                                                 <div className="bg-white p-3 rounded-lg border border-gray-200">
-                                                    <p className="text-gray-700">{selectedOrder.noteFromUser || 'Không có ghi chú'}</p>
+                                                    <p className="text-gray-700">{selectedOrder.customerNote || 'Không có ghi chú'}</p>
                                                 </div>
                                             </div>
                                             <div>
                                                 <p className="text-sm text-gray-500 mb-1">Phản hồi từ thư viện:</p>
                                                 <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
                                                     <p className="text-blue-700">
-                                                        {selectedOrder.noteFromAdmin || 'Chưa có phản hồi'}
+                                                        {selectedOrder.adminNote || 'Chưa có phản hồi'}
                                                     </p>
                                                 </div>
                                             </div>
@@ -260,7 +321,7 @@ const ReturnOrder = ({ returnOrders }) => {
                             <div>
                                 <h4 className="text-lg font-semibold text-gray-900 mb-4">Danh sách sách</h4>
                                 <div className="space-y-4">
-                                    {selectedOrder.items.map((item, index) => {
+                                    {selectedOrder.rentalItems.map((item, index) => {
                                         const itemStatus = getItemStatusConfig(item.itemStatus);
                                         const isOverdue = new Date(item.dueDate) < new Date() && item.itemStatus === 'waiting';
 
@@ -268,34 +329,48 @@ const ReturnOrder = ({ returnOrders }) => {
                                             <div key={index} className="border border-gray-200 rounded-xl p-4 hover:border-gray-300 transition-colors">
                                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                                     <div className="flex items-start gap-4">
-                                                        <div className="w-16 h-20 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
-                                                            <Package className="w-8 h-8 text-gray-400" />
+                                                        <div className="w-16 h-20 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                                            <img
+                                                                src={item.book.photoUrl.replace("minio:9000", "localhost:9000")}
+                                                                alt={item.book.title}
+                                                                className="w-full h-full object-cover"
+                                                            />
                                                         </div>
                                                         <div>
-                                                            <h5 className="font-semibold text-gray-900 text-lg">{item.bookTitle}</h5>
+                                                            <h5 className="font-semibold text-gray-900 text-lg">{item.book.title}</h5>
                                                             <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-600">
                                                                 <div className="flex items-center">
                                                                     <Calendar className="w-4 h-4 mr-1" />
-                                                                    <span>Mượn: {item.rentDate}</span>
+                                                                    <span>Mượn: {formatDateOnly(selectedOrder.order.rentStart)}</span>
                                                                 </div>
                                                                 <div className="flex items-center">
                                                                     <Calendar className="w-4 h-4 mr-1" />
                                                                     <span className={isOverdue ? 'text-red-600 font-medium' : ''}>
-                                                                        Hạn trả: {item.dueDate}
+                                                                        Hạn trả: {formatDateOnly(selectedOrder.order.rentDue)}
                                                                     </span>
                                                                 </div>
-                                                                <div className="flex items-center">
-                                                                    <span className="font-medium">
-                                                                        Phí: {item.fee > 0 ? `${item.fee.toLocaleString()} VNĐ` : '0 VNĐ'}
-                                                                    </span>
-                                                                </div>
+
                                                             </div>
+
                                                             {isOverdue && (
                                                                 <div className="mt-2 inline-flex items-center px-2 py-1 bg-red-50 text-red-700 rounded text-sm">
                                                                     <Clock className="w-3 h-3 mr-1" />
                                                                     Quá hạn trả
                                                                 </div>
                                                             )}
+
+                                                            <div className='mt-2 flex flex-wrap gap-4 text-sm text-gray-600'>
+                                                                <div className="flex items-center">
+                                                                    <span className="flex gap-1 font-medium items-center">
+                                                                        Phí: <span className='text-green-600'>{formatCurrency(getRentalFee(selectedOrder.order, item))}</span>
+                                                                    </span>
+                                                                </div>
+                                                                <div className="flex items-center">
+                                                                    <span className="flex gap-1 font-medium items-center">
+                                                                        Tiền cọc: <span className='text-amber-600'>{formatCurrency(item.book.rentDeposit)}</span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center gap-3">

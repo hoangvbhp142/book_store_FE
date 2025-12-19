@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, Calendar, Clock, AlertCircle, RotateCcw, UndoIcon, CheckCircle, BookOpen, X, MapPin, Package, Camera } from "lucide-react";
 import sach1 from '../assets/sach1.jpg';
 import { toast } from "react-toastify";
 import ReturnOrder from "../components/ReturnOrder";
+import rentalReturnApi from "../api/rentalReturnApi";
 
 // Mock data - đã thêm trạng thái đã trả
 const mockRentals = [
@@ -200,6 +201,9 @@ const RentedBooksPage = () => {
         notes: ''
     });
 
+    const [rentalRequests, setRentalRequests] = useState([]);
+    const [meta, setMeta] = useState({});
+
     const overdueRentals = mockRentals.filter((book) => book.isOverdue);
 
     const handleToggleSelection = (bookId) => {
@@ -285,6 +289,21 @@ const RentedBooksPage = () => {
 
     const statusCounts = getStatusCounts();
 
+    const fetchRentalReturns = async () => {
+        try {
+            const response = await rentalReturnApi.getAll({});
+            console.log(response);
+            setRentalRequests(response.data);
+            setMeta(response.meta);
+        } catch (error) {
+            console.log(error);
+            toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra khi tải dữ liệu");
+        }
+    }
+
+    useEffect(() => {
+        fetchRentalReturns();
+    }, [])
     console.log(selectedBooks);
 
 
@@ -293,20 +312,12 @@ const RentedBooksPage = () => {
             {/* Header */}
             <div className="bg-white top-0 z-10">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                         <div>
                             <h1 className="text-3xl font-bold text-gray-900">Sách đã thuê</h1>
                             <p className="mt-2 text-gray-600">
                                 Quản lý sách bạn đang thuê và lịch sử thuê sách
                             </p>
-                        </div>
-                        <div>
-                            <button
-                                onClick={openReturnModal}
-                                className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
-                            >
-                                Trả sách
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -331,7 +342,7 @@ const RentedBooksPage = () => {
                                 : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50"}`}
                             onClick={() => setActiveTab("returnorder")}
                         >
-                            Yêu cầu trả sách ({mockReturnOrders.length})
+                            Yêu cầu trả sách ({rentalRequests.length})
                         </button>
                         <button
                             className={`px-6 py-4 font-medium text-sm border-b-2 transition-all ${activeTab === "history"
@@ -377,7 +388,7 @@ const RentedBooksPage = () => {
 
                         {
                             activeTab === "returnorder" && (
-                                <ReturnOrder returnOrders={mockReturnOrders} />
+                                <ReturnOrder returnOrders={rentalRequests} />
                             )
                         }
                     </div>
@@ -458,13 +469,6 @@ function RentalBookCard({ selectedBooks, book, onToggleSelection }) {
     return (
         <div className={`rounded-lg border ${statusConfig.borderClass} ${statusConfig.bgClass} p-5 transition-all hover:shadow-md`}>
             <div className="flex flex-col md:flex-row gap-5 items-center">
-
-                <input
-                    type="checkbox"
-                    checked={selectedBooks.includes(book.id)}
-                    onChange={onToggleSelection}
-                    className={`h-5 w-5 rounded border-gray-300 text-blue-600 cursor-pointer ${book.status === 'returned' ? 'hidden' : ''}`} />
-                {/* Book Cover */}
                 <div className="flex-shrink-0">
                     <div className="relative">
                         <img
@@ -524,10 +528,6 @@ function RentalBookCard({ selectedBooks, book, onToggleSelection }) {
                         <div className="flex gap-3 mt-3 md:mt-0">
                             {book.status === "active" && (
                                 <>
-                                    <button className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
-                                        <RotateCcw className="h-4 w-4" />
-                                        Gia hạn
-                                    </button>
                                     <button className="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium border border-gray-300">
                                         <UndoIcon className="h-4 w-4" />
                                         Trả sách
