@@ -204,7 +204,7 @@ const BookDetail = () => {
 
   const closeReviewModal = () => setIsReviewModalOpen(false);
 
-  const addItemToCart = async () => {
+  const addItemToCart = async (isSelected) => {
     const user = localStorage.getItem('userData');
 
     // Validation
@@ -228,6 +228,7 @@ const BookDetail = () => {
       bookId: selectedBook.id,
       type: activeTab === 'buy' ? 'PURCHASE' : 'RENTAL',
       quantity: quantity,
+      isSelected: isSelected || false,
     };
 
     // Add rental type if renting
@@ -243,6 +244,10 @@ const BookDetail = () => {
     try {
       await dispatch(addToCart(cartData)).unwrap();
       toast.success("Đã thêm vào giỏ hàng");
+
+      if (isSelected) {
+        window.location.href = '/checkout';
+      }
     } catch (error) {
       console.error('Error adding to cart:', error);
       toast.error('Có lỗi xảy ra khi thêm vào giỏ hàng!');
@@ -293,7 +298,7 @@ const BookDetail = () => {
   }
 
   console.log(selectedBook);
-  
+
   return (
     <div className="min-h-screen flex flex-col text-gray-800">
       <div className="container mx-auto px-4 py-6 flex-1">
@@ -515,7 +520,7 @@ const BookDetail = () => {
 
               <div className="flex flex-col sm:flex-row gap-4 mt-4">
                 <button
-                  onClick={addItemToCart}
+                  onClick={() => addItemToCart(false)}
                   disabled={selectedBook.stockQty === 0}
                   className={`flex-1 py-3 px-6 rounded-xl font-semibold flex items-center justify-center gap-2 transition ${selectedBook.stockQty === 0
                     ? 'bg-gray-400 cursor-not-allowed text-white'
@@ -525,7 +530,10 @@ const BookDetail = () => {
                   <ShoppingCart className="h-5 w-5" />
                   {selectedBook.stockQty === 0 ? 'Hết hàng' : 'Thêm vào giỏ hàng'}
                 </button>
-                <button className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-xl font-semibold flex items-center justify-center gap-2 transition">
+                <button
+                  onClick={() => addItemToCart(true)}
+                  disabled={selectedBook.stockQty === 0}
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-xl font-semibold flex items-center justify-center gap-2 transition">
                   <Truck className="h-5 w-5" />
                   {activeTab === 'buy' ? 'Mua ngay' : 'Thuê ngay'}
                 </button>
@@ -715,7 +723,7 @@ const BookDetail = () => {
           />
         </Modal>
       </div>
-    </div>
+    </div >
   );
 }
 
