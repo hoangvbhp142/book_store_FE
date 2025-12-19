@@ -14,6 +14,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logoutState } from '../stores/authSlice.js'
 import { fetchBooks } from '../stores/bookSlice.js';
 import bookApi from '../api/bookApi.js';
+import { formatCurrency } from '../app/utils.js';
 
 const Header = () => {
   const navigate = useNavigate()
@@ -228,7 +229,7 @@ const Header = () => {
                   </div>
                 ) : searchResults.length > 0 ? (
                   <>
-                    <div className="px-3 md:px-4 py-2 md:py-2.5 text-[10px] md:text-xs font-medium text-gray-500 bg-gray-50 border-b sticky top-0">
+                    <div className="px-3 md:px-4 py-2 md:py-2.5 text-[10px] md:text-xs font-medium text-gray-500 bg-gray-50 border-b sticky top-0 z-1">
                       Tìm thấy <span className="text-blue-600 font-semibold">{searchResults.length}</span> kết quả
                     </div>
                     <div className="divide-y divide-gray-100">
@@ -257,7 +258,7 @@ const Header = () => {
                             </h4>
                             <p className="text-[10px] md:text-xs text-gray-500 truncate mt-0.5">{book.author}</p>
                             <p className="text-xs md:text-sm font-semibold text-blue-600 mt-0.5 md:mt-1">
-                              {book.sellerPrice?.toLocaleString('vi-VN')}₫
+                              {formatCurrency(book.sellerPrice)}
                             </p>
                           </div>
                         </div>
