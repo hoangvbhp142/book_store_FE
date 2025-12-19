@@ -83,7 +83,6 @@ function App() {
             <Route path="/cart" element={<Cart />} />
             <Route path='/checkout' element={<Checkout />} />
             <Route path='/rent' element={<RentPage />} />
-            <Route path='/account/*' element={<Account />} />
             <Route path="/terms" element={<PolicyDisplayPage />} />
 
             <Route path='/admin' element={

@@ -1,25 +1,51 @@
 import React, { useEffect, useState } from 'react'
 import { Package, Clock, CheckCircleIcon } from 'lucide-react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import { toast } from 'react-toastify';
+import authApi from '../api/authApi';
+import { getDiff } from '../app/utils';
+import { updateProfile } from '../stores/authSlice';
 
 const CustomerProfile = () => {
 
+    const dispatch = useDispatch();
     const { user } = useSelector(state => state.auth);
 
     const [formData, setFormData] = useState({
-        email: "",
-        password: "",
         fullName: "",
         phone: "",
-        role: "",
-        isActive: true,
-        photoUrl: "",
-        thumbnailUrl: ""
     });
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+
+    const validateForm = () => {
+        if (!formData.fullName) {
+            toast.error("Họ và tên không được để trống!");
+            return false;
+        }
+        if (!formData.phone) {
+            toast.error("Số điện thoại không được để trống!");
+            return false;
+        }
+        return true;
+    }
+
+    const handleUpdateProfile = async (e) => {
+        e.preventDefault();
+        if (!validateForm()) return;
+        try {
+            await dispatch(updateProfile({
+                fullName: formData.fullName,
+                phone: formData.phone
+            })).unwrap();
+            toast.success("Cập nhật thành công!");
+        } catch (error) {
+            console.log(error);
+            toast.error(error.response?.data?.message || "Cập nhật thất bại!");
+        }
     }
 
     useEffect(() => {
@@ -35,48 +61,11 @@ const CustomerProfile = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 p-3">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
-                            <Package className="h-6 w-6 text-blue-600" />
-                        </div>
-                        <div>
-                            <p className="text-2xl font-bold text-gray-900">12</p>
-                            <p className="text-sm text-gray-600">Tổng số đơn hàng</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center">
-                            <Clock className="h-6 w-6 text-green-600" />
-                        </div>
-                        <div>
-                            <p className="text-2xl font-bold text-gray-900">2</p>
-                            <p className="text-sm text-gray-600">Số sách đang thuê</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center">
-                            <CheckCircleIcon className="h-6 w-6 text-green-600" />
-                        </div>
-                        <div>
-                            <p className="text-2xl font-bold text-gray-900">20.000.000 đ</p>
-                            <p className="text-sm text-gray-600">Đã thanh toán</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <div className="bg-white rounded-sm shadow-sm border border-gray-200 p-6">
                 <h1 className="text-2xl font-bold text-gray-900 mb-6">Hồ sơ cá nhân</h1>
 
-                <form className="space-y-6">
+                <form className="space-y-6"
+                    onSubmit={(e) => handleUpdateProfile(e)}>
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             <span>Họ và tên</span>
@@ -117,6 +106,7 @@ const CustomerProfile = () => {
                             value={formData.email}
                             onChange={handleChange}
                             placeholder="Chưa có email"
+                            readOnly
                             className="w-full px-3 py-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </div>

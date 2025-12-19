@@ -317,7 +317,7 @@ const Header = () => {
               {/* Dropdown */}
               <div className="absolute right-0 mt-2 w-48 sm:w-56 bg-white border border-gray-200 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                 <div className="px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-100">
-                  <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">{user.fullName}</p>
+                  <p className="text-xs sm:text-sm font-medium text-gray-900 truncate max-w-[120px]">{user.fullName}</p>
                   <p className="text-[10px] sm:text-xs text-gray-500 truncate">{user.email}</p>
                 </div>
 
@@ -325,8 +325,7 @@ const Header = () => {
                   {[
                     { to: '/customer/account', icon: UserIcon, label: 'Thông tin cá nhân' },
                     { to: '/customer/orders', icon: ReceiptText, label: 'Đơn hàng của tôi' },
-                    { to: '/customer/rentals', icon: Calendar, label: 'Sách đã thuê' },
-                    { to: '/customer/wishlist', icon: HeartIcon, label: 'Yêu thích' },
+                    { to: '/customer/rentals', icon: Calendar, label: 'Yêu cầu trả sách thuê' },
                   ].map(({ to, icon: Icon, label }) => (
                     <Link
                       key={to}

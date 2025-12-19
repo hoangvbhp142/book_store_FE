@@ -6,7 +6,8 @@ import {
     Heart,
     Ticket,
     ChevronDownIcon,
-    ChevronUpIcon
+    ChevronUpIcon,
+    MapPin
 } from 'lucide-react';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -40,7 +41,10 @@ const CustomerSidebar = () => {
                     <span className="text-white font-bold text-xl">TH</span>
                 </div>
                 <div className="flex-1">
-                    <h1 className="text-xl font-bold text-gray-900">{user.fullName}</h1>
+                    <h1 className="text-xl font-bold text-gray-900 truncate max-w-[180px]">
+                        {user.fullName}
+                    </h1>
+
                     <div className="flex items-center space-x-2 mt-1">
                         <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
                         <span className="text-sm text-gray-600">{user.email}</span>
@@ -53,63 +57,26 @@ const CustomerSidebar = () => {
             <div className="space-y-1">
                 <Link
                     to='/customer/account'
-                    className={`flex items-center justify-between p-3 rounded-sm cursor-pointer
-                         ${shouldDropdownBeOpen
-                            ? 'bg-blue-50 text-blue-600 font-medium border-blue-600'
-                            : 'hover:bg-gray-100 text-gray-700'}`}
-                    onClick={() => {
-                        if (!isOpen) {
-                            toggleDropdown();
-                        }
-                    }}
+                    className={`flex items-center space-x-3 p-3 rounded-sm cursor-pointer
+                ${isActive('/customer/account')
+                            ? 'bg-blue-50 text-blue-600 font-medium'
+                            : 'hover:bg-gray-100 text-gray-700'
+                        }`}
                 >
-                    <div className={`flex items-center space-x-3`}>
-                        <UserIcon className="w-5 h-5" />
-                        <span>Thông tin tài khoản</span>
-                        {isOpen ? <ChevronUpIcon className="w-5 h-5" /> : <ChevronDownIcon className="w-5 h-5" />}
-                    </div>
+                    <UserIcon className="w-5 h-5" />
+                    <span>Thông tin tài khoản</span>
                 </Link>
 
-                {isOpen && (
-                    <div className="mt-1 ml-7 space-y-1.5">
-                        <Link
-                            to='/customer/account'
-                            className={`
-                        block p-2 rounded cursor-pointer transition-colors duration-200
-                        ${isActive('/customer/account')
-                                    ? 'bg-blue-50 text-blue-600 font-medium'
-                                    : 'hover:bg-gray-100 text-gray-700'
-                                }
-                    `}
-                        >
-                            Hồ sơ cá nhân
-                        </Link>
-                        <Link
-                            to='/customer/address'
-                            className={`
-                        block p-2 rounded cursor-pointer transition-colors duration-200
-                        ${isActive('/customer/address') || isActive('/customer/address/new')
-                                    ? 'bg-blue-50 text-blue-600 font-medium'
-                                    : 'hover:bg-gray-100 text-gray-700'
-                                }
-                    `}
-                        >
-                            Sổ địa chỉ
-                        </Link>
-                        <Link
-                            to='/customer/changepassword'
-                            className={`
-                        block p-2 rounded cursor-pointer transition-colors duration-200
-                        ${isActive('/customer/changepassword')
-                                    ? 'bg-blue-50 text-blue-600 font-medium'
-                                    : 'hover:bg-gray-100 text-gray-700'
-                                }
-                    `}
-                        >
-                            Đổi mật khẩu
-                        </Link>
-                    </div>
-                )}
+                <Link
+                    to='/customer/address'
+                    className={`flex items-center space-x-3 p-3 rounded-sm cursor-pointer
+                    ${isActive('/customer/address') || isActive('/customer/address/new')
+                            ? 'bg-blue-50 text-blue-600 font-medium'
+                            : 'hover:bg-gray-100 text-gray-700'
+                        }`} >
+                    <MapPin className='w-5 h-5' />
+                    <span>Sổ địa chỉ</span>
+                </Link>
 
                 <Link
                     to={'/customer/orders'}
@@ -137,10 +104,10 @@ const CustomerSidebar = () => {
                         }`}
                 >
                     <Calendar className="w-5 h-5" />
-                    <span>Sách thuê</span>
+                    <span>Yêu cầu trả sách thuê</span>
                 </Link>
 
-                <Link
+                {/* <Link
                     to={'/customer/vouchers'}
                     className={`flex items-center space-x-3 p-3 rounded-sm cursor-pointer
                 ${isActive('/customer/vouchers')
@@ -162,7 +129,7 @@ const CustomerSidebar = () => {
                 >
                     <Heart className="w-5 h-5" />
                     <span>Danh sách yêu thích</span>
-                </Link>
+                </Link> */}
             </div>
         </div>
     );

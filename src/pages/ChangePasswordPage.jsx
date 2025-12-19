@@ -1,6 +1,11 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 const ChangePasswordPage = () => {
+
+    const [password, setPassword] = useState('');
+
+    
+
     return (
         <div className="mx-auto bg-white p-6 rounded-lg shadow-sm border border-gray-200">
             <h1 className="text-2xl font-bold text-gray-900 mb-6">Đổi mật khẩu</h1>

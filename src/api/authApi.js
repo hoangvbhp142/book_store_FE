@@ -11,7 +11,7 @@ const authApi = {
     refresh: (data) => axiosClient.post(`${authBase}/user/refresh`, data),
     logout: (data) => axiosClient.post(`${authBase}/user/logout`, data),
 
-    updateProfile: (data) => axiosClient.put(`/user`, data),
+    updateProfile: (data) => axiosClient.patch(`/user`, data),
 };
 
 export default authApi;

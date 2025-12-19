@@ -10,7 +10,7 @@ const CustomerAddress = () => {
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const { addresses, loading, error, meta } = useSelector(state => state.address);
+    const { addresses, error, meta } = useSelector(state => state.address);
 
     const fetchAddress = async () => {
         dispatch(getAll());
@@ -36,7 +36,6 @@ const CustomerAddress = () => {
 
     return (
         <div className="bg-white p-6">
-            {loading && <Loading />}
             <div className="flex justify-between items-center mb-3">
                 <h1 className="text-2xl font-bold text-gray-900">Sổ địa chỉ</h1>
                 <button className="text-blue-600 hover:text-blue-800 text-sm flex items-center space-x-1"
