@@ -21,6 +21,7 @@ const CheckoutForm = () => {
     const dispatch = useDispatch();
 
     // ========== STATE DECLARATIONS ==========
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [selectedAddress, setSelectedAddress] = useState('');
     const [showNewAddress, setShowNewAddress] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState('vnpay');
@@ -37,8 +38,8 @@ const CheckoutForm = () => {
         district: '',
         ward: '',
         street: '',
-        isDefault: true,
-        saveAddress: false,
+        postalCode: '',
+        isDefault: false,
     });
 
     const [orderRequest, setOrderRequest] = useState({
@@ -103,11 +104,6 @@ const CheckoutForm = () => {
             rentalItems
         };
     }, [selectedItems]);
-
-    console.log(items);
-    console.log(paymentMethod);
-    console.log(selectedAddress);
-
 
     const shipping = shipmentMethod === 'normal' ? 0 : 30000;
     const total = subtotal + shipping;
@@ -175,11 +171,13 @@ const CheckoutForm = () => {
         }
     }
 
-    const createOrder = async () => {
+    const createOrder = async (addressId) => {
         // Logic tạo đơn hàng sẽ được thêm ở đây
+        console.log(addressId);
+
         try {
             const response = await orderApi.createOrder({
-                addressId: selectedAddress
+                addressId: addressId
             });
 
             if (response?.paymentUrl) {
@@ -208,8 +206,8 @@ const CheckoutForm = () => {
                 district: '',
                 ward: '',
                 street: '',
-                isDefault: true,
-                saveAddress: false,
+                postalCode: '',
+                isDefault: false,
             });
         } else {
             setShowNewAddress(false);
@@ -223,7 +221,8 @@ const CheckoutForm = () => {
                     district: selected.district,
                     ward: selected.ward,
                     street: selected.street,
-                    saveAddress: false
+                    isDefault: false,
+                    postalCode: '',
                 });
             }
         }
@@ -237,13 +236,53 @@ const CheckoutForm = () => {
         }));
     };
 
+    const addNewAddress = async () => {
+
+        if (!formData.name || !formData.phone || !formData.province || !formData.district || !formData.ward || !formData.street) {
+            toast.error('Vui lòng điền đầy đủ thông tin địa chỉ!');
+            return null;
+        }
+
+        try {
+            const response = await addressApi.create(formData);
+            return response.id;
+        } catch (error) {
+            console.log(error);
+            toast.error(error?.response?.data?.message || 'Lỗi khi thêm địa chỉ mới!');
+            return null;
+        }
+    }
+
     const handleApply = () => {
         console.log('Áp dụng mã:', code);
     };
 
-    const handlePlaceOrder = () => {
-        console.log('Đặt hàng với phương thức thanh toán:', paymentMethod);
-        createOrder();
+    const handlePlaceOrder = async () => {
+        if (isSubmitting) {
+            return;
+        }
+        setIsSubmitting(true);
+        try {
+            console.log('Đặt hàng với phương thức thanh toán:', paymentMethod);
+            let addressId = selectedAddress;
+            if (selectedAddress === 'new') {
+                let newAddressId = await addNewAddress();
+                if (!newAddressId) {
+                    return;
+                }
+                addressId = newAddressId;
+            }
+
+            if (!addressId) {
+                toast.error('Vui lòng chọn hoặc thêm địa chỉ giao hàng!');
+                return;
+            }
+
+            await createOrder(addressId);
+        } finally {
+            setIsSubmitting(false);
+
+        }
     }
 
     // ========== RENDER LOGIC ==========
@@ -258,6 +297,8 @@ const CheckoutForm = () => {
             </div>
         );
     }
+    console.log(formData);
+
 
     return (
         <div className="max-w-7xl mx-auto p-3 lg:p-8 bg-white">
@@ -536,7 +577,7 @@ const CheckoutForm = () => {
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div>
                                                 <label htmlFor="province" className="block text-sm font-medium text-gray-700 mb-3">
-                                                    Thành phố <span className="text-red-500">*</span>
+                                                    Tỉnh/Thành phố <span className="text-red-500">*</span>
                                                 </label>
                                                 <input
                                                     id="province"
@@ -818,7 +859,7 @@ const CheckoutForm = () => {
                             className="w-full bg-blue-600 text-white py-3 rounded-xl text-lg font-semibold
                hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-blue-200 hover:scale-105
                focus:outline-none focus:ring-2 focus:ring-blue-500 md:order-2"
-                            disabled={selectedItems.length === 0}
+                            disabled={selectedItems.length === 0 || isSubmitting}
                         >
                             {selectedItems.length === 0 ? 'Giỏ hàng trống' : 'Đặt hàng'}
                         </button>

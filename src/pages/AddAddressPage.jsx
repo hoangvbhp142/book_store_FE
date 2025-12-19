@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import addresses from '../data/Address';
 import { toast } from 'react-toastify';
 import { useDispatch, useSelector } from 'react-redux';
 import { create, getById, update } from '../stores/addressSlice';
+import { getDiff } from '../app/utils';
 const AddAddressPage = () => {
 
     const { id } = useParams();
     const isEdit = Boolean(id);
     const navigate = useNavigate();
-    const address = addresses.find(addre => addre.id === Number(id));
 
     const dispatch = useDispatch();
     const { currentAddress, error, loading } = useSelector(state => state.address);
@@ -35,8 +34,6 @@ const AddAddressPage = () => {
         const { name, value, type, checked } = e.target;
         setFormData((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     }
-
-    console.log(formData);
 
     useEffect(() => {
         if (isEdit) {
@@ -65,20 +62,16 @@ const AddAddressPage = () => {
         e.preventDefault();
 
         if (isEdit) {
-            console.log('Cập nhật địa chỉ:', formData);
             try {
-                const result = await dispatch(update(id, formData)).unwrap();
+                const result = await dispatch(update({ id, payload: getDiff(currentAddress, formData) })).unwrap();
                 toast.success('Cập nhật địa chỉ mới thành công');
-                console.log(result);
             } catch (error) {
                 console.log(error);
                 toast.error(error);
             }
         } else {
-            console.log('Thêm địa chỉ mới:', formData);
             try {
                 const result = await dispatch(create(formData)).unwrap();
-                console.log(result);
                 toast.success('Thêm địa chỉ mới thành công');
             } catch (error) {
                 console.log(error);
@@ -89,9 +82,6 @@ const AddAddressPage = () => {
         // Điều hướng về danh sách địa chỉ
         navigate('/customer/address');
     }
-
-    console.log(id);
-
 
     return (
         <div className="bg-white p-6">
@@ -169,6 +159,17 @@ const AddAddressPage = () => {
                         type="text"
                         value={formData.street}
                         name='street'
+                        onChange={handleChangeAddressData}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                </div>
+                <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Ghi chú
+                    </label>
+                    <input
+                        type="text"
+                        value={formData.label}
+                        name='label'
                         onChange={handleChangeAddressData}
                         className="w-full px-3 py-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                 </div>
