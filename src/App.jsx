@@ -51,6 +51,7 @@ import BannerManagementPage from './pages/admin/BannerManagementPage'
 import AdminOrderDetail from './pages/admin/AdminOrderDetail'
 import AnnouncementPopup from './components/AnnouncementPopup'
 import ReturnOrderManagement from './pages/admin/ReturnOrderManagement'
+import PaymentSuccessPage from './pages/PaymentSuccessPage'
 
 function App() {
   return (
@@ -84,6 +85,7 @@ function App() {
             <Route path='/checkout' element={<Checkout />} />
             <Route path='/rent' element={<RentPage />} />
             <Route path="/terms" element={<PolicyDisplayPage />} />
+            <Route path="/payment-success" element={<PaymentSuccessPage />} />
 
             <Route path='/admin' element={
               <ProtectedAdminRoutes>
@@ -140,8 +142,9 @@ function LayoutWrapper({ children }) {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
   const isCheckoutRoute = location.pathname === '/checkout';
+  const isPaymentSuccessRoute = location.pathname === '/payment-success';
 
-  const isHideLayout = isAdminRoute || isCheckoutRoute;
+  const isHideLayout = isAdminRoute || isCheckoutRoute || isPaymentSuccessRoute;
 
   return (
     <>
