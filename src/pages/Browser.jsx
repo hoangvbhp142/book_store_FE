@@ -42,14 +42,12 @@ const Browser = () => {
 
         let categoryFilter = [];
 
-        console.log("size", searchParams.getAll("categories"));
 
         setFilterState((prev) => ({
             ...prev,
             selectedCategories: searchParams.getAll("categories")
         }));
 
-        console.log("searchParams", Object.fromEntries(searchParams.entries()));
 
 
         if (categoryIdFromPath) categoryFilter.push(categoryIdFromPath);
@@ -80,8 +78,7 @@ const Browser = () => {
     // UPDATE PARAMS
     // ======================
     const updateParams = (patch) => {
-        console.log(params);
-        
+
         const next = {
             ...params,
             ...patch,
@@ -89,7 +86,7 @@ const Browser = () => {
                 ...params.filter,
                 ...(patch.filter || {}),
                 bookCategory: {
-                    ...patch?.filter?.bookCategory 
+                    ...patch?.filter?.bookCategory
                 }
             },
         };
@@ -151,9 +148,7 @@ const Browser = () => {
     const handleFilterChange = useCallback(
         (filters = { selectedCategories: [], priceRange: [], rating: [] }) => {
             const f = {};
-
             setFilterState(filters);
-
             // Category
             if (filters.selectedCategories.length > 0) {
                 f["bookCategory.categoryId"] = [
@@ -176,10 +171,6 @@ const Browser = () => {
             if (filters.rating.length > 0) {
                 f.averageRating = { gte: Math.min(...filters.rating) };
             }
-
-            console.log("f", f);
-            
-
             updateParams({ page: 1, filter: f });
         },
         [categoryIdFromPath, isCategoryPage]
@@ -210,8 +201,6 @@ const Browser = () => {
 
     const currentSortLabel =
         sortOptions.find(opt => opt.value === params.sort)?.label || "Sắp xếp";
-
-    console.log(filterState);
 
 
     // ======================

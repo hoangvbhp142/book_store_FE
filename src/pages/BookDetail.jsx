@@ -37,7 +37,7 @@ const BookDetail = () => {
   const [similarBooks, setSimilarBooks] = useState([]);
   const [moreDescription, setMoreDescription] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const [currentReviewPage, setCurrentReviewPage] = useState(1);
+  const [currentLimit, setCurrentLimit] = useState(5);
 
   // ==================== COMPUTED VALUES ====================
   const ratingStats = calculateRatingStats();
@@ -83,7 +83,7 @@ const BookDetail = () => {
       };
     }
 
-    const totalRating = reviewList.reduce((sum, review) => sum + review.rating, 0);
+    const totalRating = reviewList.reduce((sum, review) => sum + Number(review.rating), 0);
     const averageRating = totalRating / reviewList.length;
 
     const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
@@ -102,24 +102,15 @@ const BookDetail = () => {
     if (!selectedBook) return [];
 
     return [
-      { days: 1, label: '1 ngày', price: parseFloat(selectedBook.rentPricePerDay) },
-      { days: 7, label: '1 tuần', price: parseFloat(selectedBook.rentPricePerWeek) },
-      { days: 30, label: '1 tháng', price: parseFloat(selectedBook.rentPricePerMonth) }
+      { days: 1, label: '7 ngày', price: parseFloat(selectedBook.rentPricePerDay) },
+      { days: 7, label: '14 ngày', price: parseFloat(selectedBook.rentPricePerWeek) },
+      { days: 30, label: '30 ngày', price: parseFloat(selectedBook.rentPricePerMonth) }
     ];
   }
 
   const calculateRentalPrice = (days) => {
     const option = rentalOptions.find(opt => opt.days === days);
     return option ? option.price : 0;
-  };
-
-  const calculateRentalPenalty = (days) => {
-    const penaltyMap = {
-      1: selectedBook?.rentPenaltyPerDay,
-      7: selectedBook?.rentPenaltyPerWeek,
-      30: selectedBook?.rentPenaltyPerMonth
-    };
-    return parseFloat(penaltyMap[days] || 0);
   };
 
   // ==================== DATA GETTERS ====================
@@ -145,8 +136,7 @@ const BookDetail = () => {
     const reviewParam = {
       sort: "createdAt:desc",
       filter: JSON.stringify({ bookId: id }),
-      limit: 5,
-      page: currentReviewPage
+      limit: currentLimit
     };
 
     try {
@@ -175,16 +165,15 @@ const BookDetail = () => {
   };
 
   const loadMoreReviews = async () => {
-    const nextPage = currentReviewPage + 1;
+    const nextPage = currentLimit + 5;
     const reviewParam = {
       sort: "createdAt:desc",
       filter: JSON.stringify({ bookId: id }),
-      limit: 2,
-      page: currentReviewPage
+      limit: nextPage
     };
     console.log("Clicked!");
 
-    setCurrentReviewPage(nextPage);
+    setCurrentLimit(nextPage);
     try {
       await dispatch(fetchReviews(reviewParam)).unwrap();
     }
@@ -470,7 +459,7 @@ const BookDetail = () => {
                       <div className="flex gap-2 items-center">
                         <span className="text-gray-700 font-medium text-sm">Tiền phạt:</span>
                         <span className="text-xl font-bold text-gray-900">
-                          {utils.formatCurrency(calculateRentalPenalty(selectedRentalDays))}
+                          {utils.formatCurrency(selectedBook.rentPenaltyPerDay)}
                         </span>
                       </div>
                     </div>

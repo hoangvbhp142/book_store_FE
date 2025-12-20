@@ -132,9 +132,6 @@ const Home = () => {
     fetchBookList();
     fetchCategoryList();
     fetchBanner();
-
-    console.log(bookList);
-
     fetchBookByCategory("Văn học", setKidsBooks);
   }, []);
 
@@ -160,9 +157,6 @@ const Home = () => {
 
   // Giả sử chúng ta lấy cuốn sách đầu tiên trong bookList làm sách nổi bật
   const featuredBook = bookList[0] || {};
-
-  console.log(homeSubBanners);
-
 
   return (
     <div className="">

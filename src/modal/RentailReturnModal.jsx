@@ -14,7 +14,7 @@ const RentailReturnModal = ({
     const [formData, setFormData] = useState({
         status: "COMPLETED",
         adminNote: "",
-        receivedAt: new Date().toISOString(),
+        receivedAt: new Date(),
         rentalItems: []
     })
 
@@ -31,7 +31,7 @@ const RentailReturnModal = ({
         }
         formData.rentalItems = rentalItems;
         console.log(formData);
-        completeReturnRequest(selectedOrder.id, { status: 'COMPLETED' });
+        completeReturnRequest(selectedOrder.id, formData);
     }
 
     const getItemStatusConfig = (status) => {
@@ -305,7 +305,7 @@ const RentailReturnModal = ({
                                             <span className="ml-2 font-medium">{getStatusConfig(selectedOrder.status).text}</span>
                                         </div>
                                     </div>
-
+                                    {/* 
                                     <div>
                                         <label className="block text-xs text-gray-500 mb-2">Cập nhật trạng thái</label>
                                         <select
@@ -328,7 +328,7 @@ const RentailReturnModal = ({
                                             value={selectedOrder.receivedAt ? formatDateOnly(selectedOrder.receivedAt) : ''}
                                             onChange={(e) => console.log('Update received date:', e.target.value)}
                                         />
-                                    </div>
+                                    </div> */}
                                 </div>
                             </div>
 
@@ -370,36 +370,25 @@ const RentailReturnModal = ({
                                     <div className="flex justify-between">
                                         <span className="text-gray-600">Số sách đã nhận:</span>
                                         <span className="font-medium text-green-600">
-                                            {selectedOrder.rentalItems.filter(item => item.state === 'received').length}
+                                            {selectedOrder.rentalItems.filter(item => item.returnQuantity !== 0).length}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">Phí phạt trả sách muộn:</span>
+                                        <span className="font-semibold text-red-600">
+                                            {formatCurrency(selectedOrder.overdueFee)}
                                         </span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-gray-600">Tổng phí phạt:</span>
                                         <span className="font-semibold text-red-600">
-                                            {formatCurrency(
-                                                selectedOrder.rentalItems.reduce((sum, item) => {
-                                                    const dueDate = new Date(selectedOrder.order.rentDue);
-                                                    const today = new Date();
-                                                    const overdueDays = today > dueDate ?
-                                                        Math.ceil((today - dueDate) / (1000 * 60 * 60 * 24)) : 0;
-                                                    return sum + (overdueDays * parseFloat(item.book.rentPenaltyPerDay));
-                                                }, 0)
-                                            )}
+                                            {formatCurrency(selectedOrder.totalPenalty)}
                                         </span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-gray-600">Tổng tiền hoàn:</span>
                                         <span className="font-semibold text-green-600">
-                                            {formatCurrency(
-                                                parseFloat(selectedOrder.order.depositAmount) -
-                                                selectedOrder.rentalItems.reduce((sum, item) => {
-                                                    const dueDate = new Date(selectedOrder.order.rentDue);
-                                                    const today = new Date();
-                                                    const overdueDays = today > dueDate ?
-                                                        Math.ceil((today - dueDate) / (1000 * 60 * 60 * 24)) : 0;
-                                                    return sum + (overdueDays * parseFloat(item.book.rentPenaltyPerDay));
-                                                }, 0)
-                                            )}
+                                            {formatCurrency(selectedOrder.refundAmount)}
                                         </span>
                                     </div>
                                     <div className="pt-3 border-t border-blue-200">

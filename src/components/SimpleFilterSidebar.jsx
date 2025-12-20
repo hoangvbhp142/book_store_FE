@@ -19,7 +19,6 @@ const CategoryItem = ({
     const handleItemClick = () => {
         navigate("/category/" + category.id);
         console.log("Clicked!");
-
     };
 
     const handleArrowClick = (e) => {
