@@ -63,10 +63,10 @@ const CustomerOrderPage = () => {
         switch (status) {
             case 'PROCESSING':
                 return { text: 'Đang xử lý', color: 'bg-yellow-100 text-yellow-800 border-yellow-200' };
-            case 'PENDING':
-                return { text: 'Chờ xác nhận', color: 'bg-orange-100 text-orange-800 border-orange-200' };
             case 'PAYING':
                 return { text: 'Đang thanh toán', color: 'bg-blue-100 text-blue-800 border-blue-200' };
+            case 'WAIT_FOR_DELIVERY':
+                return { text: 'Chờ xác nhận', color: 'bg-orange-100 text-orange-800 border-orange-200' };
             case 'SHIPPING':
                 return { text: 'Đang giao hàng', color: 'bg-green-100 text-green-800 border-green-200' };
             case 'DELIVERED':

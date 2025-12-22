@@ -56,9 +56,9 @@ const CartItem = ({ item, onRemove, onUpdateQuantity, onToggleSelection, onUpdat
 
   const getRentalTypeText = (type) => {
     switch (type) {
-      case 'DAILY': return 'Thuê ngày'
-      case 'WEEKLY': return 'Thuê tuần'
-      case 'MONTHLY': return 'Thuê tháng'
+      case 'DAILY': return '7 ngày'
+      case 'WEEKLY': return '14 ngày'
+      case 'MONTHLY': return '30 ngày'
       default: return 'Thuê'
     }
   }
