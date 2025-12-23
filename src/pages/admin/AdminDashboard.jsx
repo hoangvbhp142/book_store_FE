@@ -11,7 +11,9 @@ import {
     ShoppingBag,
     BookOpen,
     Loader2,
-    AlertCircle
+    AlertCircle,
+    ShoppingCart,
+    Calendar
 } from "lucide-react";
 import analysisApi from '../../api/analysisApi'; // Điều chỉnh đường dẫn cho đúng
 
@@ -67,8 +69,8 @@ const AdminDashboard = () => {
 
                 // Xử lý dữ liệu stats
                 const currentMonth = new Date().getMonth() + 1; // Tháng hiện tại (1-12)
-                const currentMonthRevenue = revenueRes.data.find(item => item.month === currentMonth)?.revenue || 0;
-                const previousMonthRevenue = revenueRes.data.find(item => item.month === (currentMonth === 1 ? 12 : currentMonth - 1))?.revenue || 0;
+                const currentMonthRevenue = revenueRes.find(item => item.month === currentMonth)?.revenue || 0;
+                const previousMonthRevenue = revenueRes.find(item => item.month === (currentMonth === 1 ? 12 : currentMonth - 1))?.revenue || 0;
 
                 setStats([
                     {
@@ -356,7 +358,7 @@ const AdminDashboard = () => {
             </div>
 
             {/* === Biểu đồ doanh thu + đơn hàng === */}
-            <div className="flex flex-col gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Biểu đồ doanh thu */}
                 <div className="bg-white border border-gray-300 rounded-2xl shadow-sm p-6">
                     <div className="flex items-center justify-between mb-4">
@@ -369,8 +371,8 @@ const AdminDashboard = () => {
                         <div className="h-64 flex items-center justify-center">
                             <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
                         </div>
-                    ) : revenueData.length > 0 ? (
-                        <ResponsiveContainer width="100%" height={250}>
+                    ) : (
+                        <ResponsiveContainer width="100%" height={300}>
                             <LineChart data={revenueData}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                                 <XAxis
@@ -405,18 +407,13 @@ const AdminDashboard = () => {
                                 />
                             </LineChart>
                         </ResponsiveContainer>
-                    ) : (
-                        <div className="h-64 flex flex-col items-center justify-center text-gray-500">
-                            <AlertCircle className="h-12 w-12 mb-2" />
-                            <p>Chưa có dữ liệu doanh thu</p>
-                        </div>
                     )}
                 </div>
 
                 {/* Biểu đồ đơn hàng theo danh mục */}
                 <div className="bg-white border border-gray-300 rounded-2xl shadow-sm p-6">
                     <h2 className="text-lg font-semibold mb-4">Đơn hàng theo danh mục</h2>
-                    <ResponsiveContainer width="100%" height={250}>
+                    <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={ordersByCategory}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                             <XAxis
@@ -445,118 +442,200 @@ const AdminDashboard = () => {
                 </div>
             </div>
 
-            {/* === Biểu đồ người dùng + Top sách === */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Người dùng theo loại */}
-                <div className="bg-white border border-gray-300 rounded-2xl shadow-sm p-6">
-                    <h2 className="text-lg font-semibold mb-4">Tỉ lệ người dùng</h2>
-                    {userRoles.every(role => role.value === 0) ? (
-                        <div className="h-64 flex flex-col items-center justify-center text-gray-500">
-                            <AlertCircle className="h-12 w-12 mb-2" />
-                            <p>Chưa có dữ liệu người dùng</p>
-                        </div>
-                    ) : (
-                        <ResponsiveContainer width="100%" height={350}>
-                            <PieChart>
-                                <Pie
-                                    data={userRoles.filter(role => role.value > 0)}
-                                    dataKey="value"
-                                    nameKey="name"
-                                    cx="50%"
-                                    cy="50%"
-                                    outerRadius={90}
-                                    label={(entry) => `${entry.name}: ${entry.value}%`}
-                                >
-                                    {userRoles.filter(role => role.value > 0).map((entry, i) => (
-                                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                                    ))}
-                                </Pie>
-                                <Tooltip
-                                    formatter={(value) => [`${value}%`, "Tỉ lệ"]}
-                                    contentStyle={{
-                                        borderRadius: '8px',
-                                        border: '1px solid #e5e7eb'
-                                    }}
-                                />
-                                <Legend />
-                            </PieChart>
-                        </ResponsiveContainer>
-                    )}
-                </div>
+            {/* === Biểu đồ người dùng === */}
+            <div className="bg-white border border-gray-300 rounded-2xl shadow-sm p-6">
+                <h2 className="text-lg font-semibold mb-4">Tỉ lệ người dùng</h2>
+                <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                        <Pie
+                            data={userRoles}
+                            dataKey="value"
+                            nameKey="name"
+                            cx="50%"
+                            cy="50%"
+                            outerRadius={90}
+                            label={(entry) => `${entry.name}: ${entry.value}%`}
+                        >
+                            {userRoles.map((entry, i) => (
+                                <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                            ))}
+                        </Pie>
+                        <Tooltip
+                            formatter={(value) => [`${value}%`, "Tỉ lệ"]}
+                            contentStyle={{
+                                borderRadius: '8px',
+                                border: '1px solid #e5e7eb'
+                            }}
+                        />
+                        <Legend />
+                    </PieChart>
+                </ResponsiveContainer>
+            </div>
 
-                {/* Top sách bán/thuê nhiều */}
+            {/* === 3 Bảng Top: Phổ biến, Mua, Thuê === */}
+            <div className="grid grid-cols-1 gap-6">
+                {/* Top sách phổ biến */}
                 <div className="bg-white border border-gray-300 rounded-2xl shadow-sm p-6">
                     <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-semibold">Top sách phổ biến</h2>
-                        <div className="text-sm text-gray-500">
-                            {topBooks.length > 0 ? `${topBooks.length} sách` : 'Chưa có dữ liệu'}
+                        <div className="flex items-center gap-2">
+                            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <BookOpen className="h-5 w-5 text-purple-600" />
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-semibold">Top sách phổ biến</h2>
+                                <p className="text-xs text-gray-500">Tổng hợp mua + thuê</p>
+                            </div>
                         </div>
                     </div>
                     {loading.topBooks ? (
-                        <div className="h-64 flex items-center justify-center">
+                        <div className="h-96 flex items-center justify-center">
                             <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
                         </div>
                     ) : topBooks.length > 0 ? (
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-sm text-left text-gray-600">
-                                <thead className="text-xs uppercase bg-gray-100 text-gray-600">
-                                    <tr>
-                                        <th className="px-4 py-2 rounded-l-lg">Sách</th>
-                                        <th className="px-4 py-2 text-center">Đã bán</th>
-                                        <th className="px-4 py-2 text-center">Đã thuê</th>
-                                        <th className="px-4 py-2 text-center rounded-r-lg">Tổng</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {topBooks.map((book, i) => (
-                                        <tr key={i} className="border-t hover:bg-gray-50 transition">
-                                            <td className="px-4 py-3 font-medium">
-                                                <div className="max-w-xs truncate" title={book.name}>
-                                                    {book.name}
-                                                </div>
-                                            </td>
-                                            <td className="px-4 py-3 text-center">
-                                                <span className="font-semibold text-blue-600">
-                                                    {book.sold || 0}
+                        <div className="space-y-3">
+                            {topBooks.map((book, i) => (
+                                <div key={i} className="border border-gray-200 rounded-lg p-3 hover:border-purple-300 hover:bg-purple-50 transition">
+                                    <div className="flex items-start justify-between gap-2">
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className="text-lg font-bold text-purple-600">#{i + 1}</span>
+                                                <p className="font-medium text-sm text-gray-800 truncate" title={book.title}>
+                                                    {book.title}
+                                                </p>
+                                            </div>
+                                            <div className="flex items-center gap-4 text-xs">
+                                                <span className="text-blue-600 font-semibold">
+                                                    Mua: {book.totalCount || 0}
                                                 </span>
-                                            </td>
-                                            <td className="px-4 py-3 text-center">
-                                                <span className="font-semibold text-green-600">
-                                                    {book.rented || 0}
+                                                <span className="text-green-600 font-semibold">
+                                                    Thuê: {book.rented || 0}
                                                 </span>
-                                            </td>
-                                            <td className="px-4 py-3 text-center">
-                                                <span className="font-bold text-purple-600">
-                                                    {(book.sold || 0) + (book.rented || 0)}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-lg font-bold text-purple-600">
+                                                {(book.totalCount || 0) + (book.rented || 0)}
+                                            </p>
+                                            <p className="text-xs text-gray-500">Tổng</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     ) : (
-                        <div className="h-64 flex flex-col items-center justify-center text-gray-500">
+                        <div className="h-96 flex flex-col items-center justify-center text-gray-500">
                             <AlertCircle className="h-12 w-12 mb-2" />
-                            <p>Chưa có dữ liệu sách phổ biến</p>
-                            <p className="text-sm mt-1">Sẽ hiển thị khi có đơn hàng đầu tiên</p>
+                            <p>Chưa có dữ liệu</p>
+                        </div>
+                    )}
+                </div>
+
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                {/* Top sách mua nhiều */}
+                <div className="bg-white border border-gray-300 rounded-2xl shadow-sm p-6">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <ShoppingCart className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-semibold">Top sách mua nhiều</h2>
+                                <p className="text-xs text-gray-500">Bán chạy nhất</p>
+                            </div>
+                        </div>
+                    </div>
+                    {loading.topBooks ? (
+                        <div className="h-96 flex items-center justify-center">
+                            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+                        </div>
+                    ) : topPurchase.length > 0 ? (
+                        <div className="space-y-3">
+                            {topPurchase.map((book, i) => (
+                                <div key={i} className="border border-gray-200 rounded-lg p-3 hover:border-blue-300 hover:bg-blue-50 transition">
+                                    <div className="flex items-start justify-between gap-2">
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className="text-lg font-bold text-blue-600">#{i + 1}</span>
+                                                <p className="font-medium text-sm text-gray-800 truncate" title={book.title}>
+                                                    {book.title}
+                                                </p>
+                                            </div>
+                                            <p className="text-xs text-gray-500 truncate" title={book.author}>
+                                                {book.author}
+                                            </p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-lg font-bold text-blue-600">
+                                                {book.totalSold}
+                                            </p>
+                                            <p className="text-xs text-gray-500">Đã bán</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="h-96 flex flex-col items-center justify-center text-gray-500">
+                            <AlertCircle className="h-12 w-12 mb-2" />
+                            <p>Chưa có dữ liệu</p>
+                        </div>
+                    )}
+                </div>
+
+                {/* Top sách thuê nhiều */}
+                <div className="bg-white border border-gray-300 rounded-2xl shadow-sm p-6">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                <Calendar className="h-5 w-5 text-green-600" />
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-semibold">Top sách thuê nhiều</h2>
+                                <p className="text-xs text-gray-500">Được thuê nhiều nhất</p>
+                            </div>
+                        </div>
+                    </div>
+                    {loading.topBooks ? (
+                        <div className="h-96 flex items-center justify-center">
+                            <Loader2 className="h-8 w-8 animate-spin text-green-500" />
+                        </div>
+                    ) : topRental.length > 0 ? (
+                        <div className="space-y-3">
+                            {topRental.map((book, i) => (
+                                <div key={i} className="border border-gray-200 rounded-lg p-3 hover:border-green-300 hover:bg-green-50 transition">
+                                    <div className="flex items-start justify-between gap-2">
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className="text-lg font-bold text-green-600">#{i + 1}</span>
+                                                <p className="font-medium text-sm text-gray-800 truncate" title={book.title}>
+                                                    {book.title}
+                                                </p>
+                                            </div>
+                                            <p className="text-xs text-gray-500 truncate" title={book.author}>
+                                                {book.author}
+                                            </p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-lg font-bold text-green-600">
+                                                {book.totalRented}
+                                            </p>
+                                            <p className="text-xs text-gray-500">Lượt thuê</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="h-96 flex flex-col items-center justify-center text-gray-500">
+                            <AlertCircle className="h-12 w-12 mb-2" />
+                            <p>Chưa có dữ liệu</p>
                         </div>
                     )}
                 </div>
             </div>
-
-            {/* Thông tin debug */}
-            {process.env.NODE_ENV === 'development' && (
-                <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <h3 className="text-sm font-semibold text-yellow-800 mb-2">Thông tin API (Debug):</h3>
-                    <div className="text-xs text-yellow-700 space-y-1">
-                        <p>• Tổng người dùng: {stats.find(s => s.title === "Tổng người dùng")?.value || 0}</p>
-                        <p>• Tổng sách: {stats.find(s => s.title === "Tổng số sách")?.value || 0}</p>
-                        <p>• Tổng đơn hàng: {stats.find(s => s.title === "Tổng đơn hàng")?.value || 0}</p>
-                        <p>• Số sách phổ biến: {topBooks.length}</p>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };
