@@ -6,14 +6,17 @@ import {
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAll as getAllCategories } from '../stores/categorySlice';
-import { getAll as getAllPublishers } from '../stores/publisherSlice';
-import { getAll as getAllAuthors } from '../stores/authorSlice';
+import { create as createPublisher, getAll as getAllPublishers } from '../stores/publisherSlice';
+import { create as createAuthor, getAll as getAllAuthors } from '../stores/authorSlice';
 import Select from 'react-select';
 import { toast } from 'react-toastify';
 import imageApi from '../api/imageApi';
 import { createBook, fetchBookById, updateBook } from '../stores/bookSlice';
 import { useParams } from 'react-router-dom';
 import { getDiff } from '../app/utils';
+import AuthorModal from '../modal/AuthorModal';
+import Modal from '../modal/Modal';
+import PublisherModal from '../modal/PublisherModal';
 
 // Constants
 const INITIAL_FORM_DATA = {
@@ -110,16 +113,42 @@ const ModifyBookForm = () => {
     const [originalData, setOriginalData] = useState(null);
     const [loading, setLoading] = useState(false);
 
+    const [showAuthorModal, setShowAuthorModal] = useState(false);
+    const [showCategoryModal, setShowCategoryModal] = useState(false);
+    const [showPublisherModal, setShowPublisherModal] = useState(false);
+
     // ========== DERIVED VALUES ==========
+
+    //Author
+    const ADD_NEW_AUTHOR_OPTION = {
+        value: 'add_new_author',
+        label: (<span className="text-blue-600 font-medium flex items-center gap-1"><Plus className='w-4 h-4' /> Thêm tác giả mới</span>),
+    }
+
     const authorOptions = authors?.map(author => ({
         value: author.id,
         label: author.name
     })) || [];
 
+    const authorOptionsWithAddNew = [
+        ADD_NEW_AUTHOR_OPTION,
+        ...authorOptions
+    ];
+
+    //Category
+    const ADD_NEW_CATEGORY_OPTION = {
+        value: 'add_new_category',
+        label: (<span className="text-blue-600 font-medium flex items-center gap-1"><Plus className='w-4 h-4' /> Thêm danh mục mới</span>),
+    }
     const categoryOptions = categories?.map(category => ({
         value: category.id,
         label: category.name
     })) || [];
+
+    const categoryOptionsWithAddNew = [
+        ADD_NEW_CATEGORY_OPTION,
+        ...categoryOptions
+    ];
 
     const selectedAuthors = authorOptions.filter(option =>
         (formData.authorIds || []).includes(option.value)
@@ -134,6 +163,14 @@ const ModifyBookForm = () => {
     // ========== EVENT HANDLERS ==========
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
+
+
+        if (value === 'add_new_publisher') {
+            console.log(name, value);
+            setShowPublisherModal(true);
+            return;
+        }
+
         setFormData(prevData => ({
             ...prevData,
             [name]: type === 'checkbox' ? checked : value,
@@ -141,6 +178,19 @@ const ModifyBookForm = () => {
     };
 
     const handleAuthorChange = (selectedOptions) => {
+
+        if (!selectedOptions) {
+            return;
+        }
+
+        const isAddNew = selectedOptions.some(option => option.value === 'add_new_author');
+
+        if (isAddNew) {
+            const filtered = selectedOptions.filter(option => option.value !== 'add_new_author');
+            setShowAuthorModal(true);
+            return;
+        }
+
         const selectedValues = selectedOptions ? selectedOptions.map(option => option.value) : [];
         setFormData(prevData => ({
             ...prevData,
@@ -149,6 +199,19 @@ const ModifyBookForm = () => {
     };
 
     const handleCategoryChange = (selectedOptions) => {
+
+        if (!selectedOptions) {
+            return;
+        }
+
+        const isAddNew = selectedOptions.some(option => option.value === 'add_new_category');
+
+        if (isAddNew) {
+            const filtered = selectedOptions.filter(option => option.value !== 'add_new_category');
+            setShowCategoryModal(true);
+            return;
+        }
+
         const selectedValues = selectedOptions ? selectedOptions.map(option => option.value) : [];
         setFormData(prevData => ({
             ...prevData,
@@ -190,6 +253,43 @@ const ModifyBookForm = () => {
             setLoading(false);
         }
     };
+
+    const addNewAuthor = async (authorData) => {
+        try {
+            const response = await dispatch(createAuthor(authorData)).unwrap();
+            console.log(response);
+            const newAuthorOption = {
+                value: response.id,
+                label: response.name
+            };
+            setShowAuthorModal(false);
+            setFormData(prevData => ({
+                ...prevData,
+                authorIds: [...(prevData.authorIds || []), response.id]
+            }));
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const addNewPublisher = async (publisherData) => {
+        try {
+            const response = await dispatch(createPublisher(publisherData)).unwrap();
+            console.log(response);
+            const newPublisherOption = {
+                value: response.id,
+                label: response.name
+            };
+            setShowPublisherModal(false);
+            setFormData(prevData => ({
+                ...prevData,
+                publisherId: response.id
+            }));
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -324,8 +424,6 @@ const ModifyBookForm = () => {
             </div>
         );
     }
-
-    console.log(formData);
 
     return (
         <div className="bg-white shadow-sm rounded-2xl p-8 border border-gray-100">
@@ -488,7 +586,7 @@ const ModifyBookForm = () => {
                             </label>
                             <Select
                                 isMulti
-                                options={authorOptions}
+                                options={authorOptionsWithAddNew}
                                 value={selectedAuthors}
                                 onChange={handleAuthorChange}
                                 placeholder="Chọn tác giả..."
@@ -513,6 +611,11 @@ const ModifyBookForm = () => {
                                 required
                             >
                                 <option value="">Chọn nhà xuất bản</option>
+                                <option value="add_new_publisher">
+                                    <span className='flex items-center'>
+                                        <Plus className='w-4 h-4 inline-block mr-1' /> Thêm nhà xuất bản mới
+                                    </span>
+                                </option>
                                 {publishers.map(publisher => (
                                     <option key={publisher.id} value={publisher.id}>
                                         {publisher.name}
@@ -528,7 +631,7 @@ const ModifyBookForm = () => {
                             </label>
                             <Select
                                 isMulti
-                                options={categoryOptions}
+                                options={categoryOptionsWithAddNew}
                                 value={selectedCategories}
                                 onChange={handleCategoryChange}
                                 placeholder="Chọn danh mục..."
@@ -811,6 +914,33 @@ const ModifyBookForm = () => {
                     </button>
                 </div>
             </form>
+
+            <Modal isOpen={showAuthorModal} onClose={() => setShowAuthorModal(false)} title={"Thêm Tác giả mới"}>
+                <AuthorModal
+                    // isEdit={modalData.isEdit}
+                    // data={modalData.author}
+                    onClose={() => setShowAuthorModal(false)}
+                    onSubmit={addNewAuthor}
+                />
+            </Modal>
+
+            {/* <Modal isOpen={showCategoryModal} onClose={() => setShowCategoryModal(false)} title={"Thêm Tác giả mới"}>
+                <AuthorModal
+                    // isEdit={modalData.isEdit}
+                    // data={modalData.author}
+                    onClose={() => setShowCategoryModal(false)}
+                    onSubmit={addNewCategory}
+                />
+            </Modal> */}
+
+            <Modal isOpen={showPublisherModal} onClose={() => setShowPublisherModal(false)} title={"Thêm Nhà xuất bản mới"}>
+                <PublisherModal
+                    // isEdit={modalData.isEdit}
+                    // data={modalData.author}
+                    onClose={() => setShowPublisherModal(false)}
+                    onSubmit={addNewPublisher}
+                />
+            </Modal>
         </div>
     );
 }
