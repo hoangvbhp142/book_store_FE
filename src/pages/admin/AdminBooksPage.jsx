@@ -139,17 +139,7 @@ const AdminBooksPage = () => {
                     </div>
 
                     {/* FILTERS */}
-                    <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-
-                        {/* CATEGORY */}
-                        <select
-                            className="px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-gray-50 hover:bg-white transition-all flex-1 lg:min-w-[140px]"
-                            value={selectedCategory}
-                            onChange={(e) => setSelectedCategory(e.target.value)}
-                        >
-                            <option value="all">Tất cả danh mục</option>
-                            {/* Bạn có categories thì map vào đây */}
-                        </select>
+                    <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">        
 
                         {/* STATUS */}
                         <select
