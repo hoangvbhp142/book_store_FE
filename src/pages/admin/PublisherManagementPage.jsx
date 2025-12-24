@@ -167,13 +167,6 @@ const PublisherManagementPage = () => {
 
                         <option value="contactEmail:asc">Sắp xếp theo email A-Z</option>
                         <option value="contactEmail:desc">Sắp xếp theo email Z-A</option>
-
-                        <option value="website:asc">Sắp xếp theo website A-Z</option>
-                        <option value="website:desc">Sắp xếp theo website Z-A</option>
-
-                        <option value="address:asc">Sắp xếp theo địa chỉ A-Z</option>
-                        <option value="address:desc">Sắp xếp theo địa chỉ Z-A</option>
-
                     </select>
                 </div>
             </div>
