@@ -75,12 +75,17 @@ export default function AdminProfilePage() {
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
                     <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-200">
                         <div className="relative">
-                            <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
-                                <User size={32} className="text-gray-500" />
+                            <div className="h-15 w-15 rounded-full bg-gray-300 flex items-center justify-center">
+                                <span className="text-2xl font-semibold text-gray-700">
+                                    {user.fullName
+                                        ?.split(" ")
+                                        .map(word => word[0])
+                                        .slice(0, 2)
+                                        .join("")
+                                        .toUpperCase()}
+                                </span>
                             </div>
-                            <button className="absolute bottom-0 right-0 bg-blue-600 text-white p-1.5 rounded-full hover:bg-blue-700">
-                                <Camera size={16} />
-                            </button>
+
                         </div>
                         <div>
                             <h3 className="text-xl font-semibold text-gray-800">{formData.fullName}</h3>

@@ -55,6 +55,9 @@ const RentailReturnModal = ({
         return configs[status] || configs.waiting;
     };
 
+    console.log(selectedOrder);
+
+
     return (
         <div className="fixed inset-0 bg-gray-600/30 bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
@@ -224,7 +227,7 @@ const RentailReturnModal = ({
                                                 </div>
 
                                                 <div className="grid grid-cols-2 gap-3 items-center justify-between pt-4 border-t border-gray-200">
-                                                    <div className="flex items-center space-x-2">
+                                                    {/* <div className="flex items-center space-x-2">
                                                         <span className="text-sm text-gray-600">Trạng thái trả:</span>
                                                         <select
                                                             className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm"
@@ -235,7 +238,7 @@ const RentailReturnModal = ({
                                                             <option value="damaged">Hư hỏng</option>
                                                             <option value="lost">Mất sách</option>
                                                         </select>
-                                                    </div>
+                                                    </div> */}
 
                                                     <div className="flex items-center space-x-2">
                                                         <span className="text-sm text-gray-600">Số lượng trả:</span>
@@ -244,8 +247,8 @@ const RentailReturnModal = ({
                                                             min="0"
                                                             max={item.quantity}
                                                             name='returnQuantity'
-                                                            defaultValue={0}
-                                                            className="w-20 border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-center"
+                                                            defaultValue={item.returnQuantity || 0}
+                                                            className={`w-20 border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-center ${selectedOrder.status === 'COMPLETED' ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                                                             placeholder="0"
                                                             onChange={(e) => {
                                                                 const returnedQty = parseInt(e.target.value) || 0;
@@ -271,9 +274,9 @@ const RentailReturnModal = ({
                                                         <span className="text-sm text-gray-600">Phí phạt:</span>
                                                         <input
                                                             type="number"
-                                                            className="w-32 border border-gray-300 rounded-lg px-3 py-1.5 text-sm"
+                                                            className={`w-32 border border-gray-300 rounded-lg px-3 py-1.5 text-sm ${selectedOrder.status === 'COMPLETED' ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                                                             placeholder="Phí (VNĐ)"
-                                                            defaultValue={penaltyFee}
+                                                            defaultValue={item.penalty || 0}
                                                             onChange={(e) => {
                                                                 const penalty = parseInt(e.target.value) || 0;
                                                                 setRentalItems(prevItems => prevItems.map(ri => {
@@ -349,8 +352,8 @@ const RentailReturnModal = ({
                                     <div>
                                         <label className="block text-xs text-gray-500 mb-2">Ghi chú của quản lý</label>
                                         <textarea
-                                            className="w-full h-32 border border-gray-300 rounded-lg p-3 text-sm"
-                                            placeholder="Thêm ghi chú..."
+                                            className={`w-full h-32 border border-gray-300 rounded-lg p-3 text-sm ${selectedOrder.status === "COMPLETED" ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                                            placeholder={selectedOrder.adminNote === "" ? "Không có ghi chú của quản lý" : "Thêm ghi chú..."}
                                             defaultValue={selectedOrder.adminNote || ''}
                                             name='adminNote'
                                             onChange={(e) => setFormData({ ...formData, adminNote: e.target.value })}
@@ -391,7 +394,7 @@ const RentailReturnModal = ({
                                             {formatCurrency(selectedOrder.refundAmount)}
                                         </span>
                                     </div>
-                                    <div className="pt-3 border-t border-blue-200">
+                                    <div className={`pt-3 border-t border-blue-200 ${selectedOrder.status === 'COMPLETED' ? 'hidden' : ''}`}>
                                         <button
                                             onClick={() => completeRequest()}
                                             className="w-full py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"

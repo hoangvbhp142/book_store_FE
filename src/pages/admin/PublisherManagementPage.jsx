@@ -23,8 +23,6 @@ const PublisherManagementPage = () => {
     const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
     const [currentPage, setCurrentPage] = useState(1);
 
-
-
     const [searchParams, setSearchParams] = useSearchParams();
     const [params, setParams] = useState({
         sort: searchParams.get("sort") || "name:asc",
@@ -53,8 +51,6 @@ const PublisherManagementPage = () => {
             ...(next.page !== 0 ? { page: next.page } : {}),
             ...(next.limit !== 0 ? { limit: next.limit } : {})
         };
-
-        console.log(toSet);
 
         setSearchParams(toSet);
     };

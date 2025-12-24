@@ -57,24 +57,37 @@ const PolicyPage = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 py-6 px-4">
+        <div className="min-h-screen bg-white py-6 px-4">
             <div className="max-w-7xl mx-auto space-y-5">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                     <h1 className="text-2xl font-bold text-gray-900">Quản lý Chính sách</h1>
                     {filteredPolicies.length > 0 && (
                         <button
-                            className="inline-flex items-center px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                            className="inline-flex items-center px-2 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
                             onClick={() => navigate(`/admin/policies/add`)}
                         >
-                            <Plus className="w-5 h-5 mr-2" />
+                            <Plus className="w-5 h-5 mr-1" />
                             Thêm chính sách mới
                         </button>
                     )}
                 </div>
 
                 {/* Search & Filter */}
-                <div className="flex flex-col sm:flex-row gap-3 bg-white border border-gray-300 rounded-lg p-3 shadow-sm">
+                <div className="flex flex-col sm:flex-row gap-3 bg-white">
+
+                    {/* Search */}
+                    <div className="flex-1 relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <input
+                            type="text"
+                            placeholder="Tìm kiếm chính sách..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                    </div>
+
                     {/* Filter */}
                     <div className="sm:w-52 relative">
                         <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -88,18 +101,6 @@ const PolicyPage = () => {
                             <option value="draft">Bản nháp</option>
                             <option value="inactive">Ngừng hoạt động</option>
                         </select>
-                    </div>
-
-                    {/* Search */}
-                    <div className="flex-1 relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                        <input
-                            type="text"
-                            placeholder="Tìm kiếm chính sách..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
                     </div>
                 </div>
 

@@ -100,37 +100,32 @@ const AdminRentalsPage = () => {
         <div className="min-h-screen flex flex-col">
             <main className="flex-1 bg-gray-50/30 p-5">
                 <div className="flex justify-between items-center mb-5">
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Quản Lý Sách Thuê</h1>
-                        <p className="text-gray-600 mt-1">Quản lý và xử lý tất cả yêu cầu trả sách từ người dùng</p>
-                    </div>
+                    <h1 className="text-2xl font-bold text-gray-900">Quản Lý Sách Thuê</h1>
                 </div>
                 <div className="container mx-auto">
                     {/* Filters and Search */}
-                    <div className="bg-white rounded-lg border border-gray-300 shadow-sm overflow-hidden mb-6">
-                        <div className="p-3">
-                            <div className="flex flex-col md:flex-row gap-4">
-                                <div className="flex-1 relative">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                                    <input
-                                        placeholder="Tìm kiếm theo mã đơn, tên sách, SKU"
-                                        className="w-full pl-10 px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    />
-                                </div>
-                                <select defaultValue="all" className="w-full md:w-[180px] border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="all">Tất cả trạng thái</option>
-                                    <option value="ACTIVE">Đang thuê</option>
-                                    <option value="OVERDUE">Quá hạn</option>
-                                    <option value="RETURNED">Đã trả</option>
-                                    <option value="PENDING">Chờ xử lý</option>
-                                </select>
-                                <select defaultValue="all" className="w-full md:w-[180px] border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="all">Tất cả thời gian</option>
-                                    <option value="today">Hôm nay</option>
-                                    <option value="week">Tuần này</option>
-                                    <option value="month">Tháng này</option>
-                                </select>
+                    <div className="bg-white rounded-lg overflow-hidden mb-6">
+                        <div className="flex flex-col md:flex-row gap-4">
+                            <div className="flex-1 relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                                <input
+                                    placeholder="Tìm kiếm theo mã đơn, tên sách, SKU"
+                                    className="w-full pl-10 px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400"
+                                />
                             </div>
+                            <select defaultValue="all" className="w-full md:w-[180px] border border-gray-300 rounded-md px-3 py-2 text-sm">
+                                <option value="all">Tất cả trạng thái</option>
+                                <option value="ACTIVE">Đang thuê</option>
+                                <option value="OVERDUE">Quá hạn</option>
+                                <option value="RETURNED">Đã trả</option>
+                                <option value="PENDING">Chờ xử lý</option>
+                            </select>
+                            <select defaultValue="all" className="w-full md:w-[180px] border border-gray-300 rounded-md px-3 py-2 text-sm">
+                                <option value="all">Tất cả thời gian</option>
+                                <option value="today">Hôm nay</option>
+                                <option value="week">Tuần này</option>
+                                <option value="month">Tháng này</option>
+                            </select>
                         </div>
                     </div>
 

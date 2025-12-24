@@ -5,23 +5,46 @@ import adminRentalApi from '../../api/adminRentalApi';
 import { formatCurrency, formatDate, shortenId } from '../../app/utils';
 import RentailReturnModal from '../../modal/RentailReturnModal';
 import PagingBar from '../../components/PagingBar';
+import AdvancedPagingBar from '../../components/AdvancedPagingBar';
+import { useSearchParams } from 'react-router-dom';
 
 const ReturnOrderManagement = () => {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState('all');
-    const [dateFilter, setDateFilter] = useState('all');
 
     const [returnOrders, setReturnOrders] = useState([]);
     const [meta, setMeta] = useState({});
 
+    const [searchParams, setSearchParams] = useSearchParams();
     const [params, setParams] = useState({
-        sort: '',
-        q: '',
-        page: 1,
-        limit: 10
+        sort: searchParams.get('sort') || 'createdAt: desc',
+        q: searchParams.get('q') || '',
+        page: Number(searchParams.get('page')) || 1,
+        limit: Number(searchParams.get('limit')) || 10,
+        filter: {
+            status: searchParams.get('status') || '',
+        }
     })
+
+    const updateParams = (newParams) => {
+        const next = {
+            ...params,
+            ...newParams
+        };
+
+        setParams(next);
+
+        const toSet = {
+            ...(next.sort ? { sort: next.sort } : {}),
+            ...(next.q ? { q: next.q } : {}),
+            ...(next.page ? { page: next.page } : {}),
+            ...(next.limit ? { limit: next.limit } : {}),
+            ...(next.filter.status ? { status: next.filter.status } : {}),
+        };
+
+        setSearchParams(toSet);
+    }
 
     const getStatusConfig = (status) => {
         const configs = {
@@ -66,22 +89,11 @@ const ReturnOrderManagement = () => {
         return configs[status] || configs.PENDING;
     };
 
-    // Tính toán thống kê
-    const stats = {
-        total: returnOrders.length,
-        pending: returnOrders.filter(o => o.status === 'pending').length,
-        processing: returnOrders.filter(o => o.status === 'processing').length,
-        completed: returnOrders.filter(o => o.status === 'completed').length,
-        rejected: returnOrders.filter(o => o.status === 'rejected').length,
-    };
-
-
     const acceptReturnRequest = async (requestId) => {
         try {
             const response = await adminRentalApi.approveReturn(requestId, {
                 status: 'APPROVAL'
             });
-            console.log(response);
             toast.success('Yêu cầu trả sách đã được chấp nhận thành công.');
         } catch (error) {
             console.log(error);
@@ -93,7 +105,6 @@ const ReturnOrderManagement = () => {
     const completeReturnRequest = async (requestId, data) => {
         try {
             const response = await adminRentalApi.approveReturn(requestId, data);
-            console.log(response);
             toast.success('Yêu cầu trả sách đã được hoàn tất thành công.');
         } catch (error) {
             console.log(error);
@@ -105,7 +116,6 @@ const ReturnOrderManagement = () => {
     const handleViewDetail = async (request) => {
         try {
             const response = await adminRentalApi.getReturnById(request.id);
-            console.log("leelo", response);
             setSelectedOrder(response);
             setShowModal(true);
         } catch (error) {
@@ -118,8 +128,11 @@ const ReturnOrderManagement = () => {
 
     const fetchRentalReturns = async () => {
         try {
-            const response = await adminRentalApi.getAllReturns(params);
-            console.log(response);
+            const finalParams = {
+                ...params,
+                filter: JSON.stringify(params.filter)
+            }
+            const response = await adminRentalApi.getAllReturns(finalParams);
             setReturnOrders(response.data);
             setMeta(response.meta);
         } catch (error) {
@@ -134,51 +147,45 @@ const ReturnOrderManagement = () => {
 
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
+        <div className="min-h-screen bg-white p-6">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
-                <div className="mb-8">
+                <div className="mb-5">
                     <div className="flex justify-between items-center mb-6">
                         <h1 className="text-2xl font-bold text-gray-900">Quản Lý Yêu Cầu Trả Sách</h1>
                     </div>
                 </div>
 
                 {/* Search and Filter Bar */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
+                <div className="mb-6">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="flex-1">
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                <input
-                                    type="text"
-                                    placeholder="Tìm kiếm theo mã yêu cầu, tên người dùng, email..."
-                                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                />
-                            </div>
+                        {/* Search */}
+                        <div className="flex-1 relative h-10">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                            <input
+                                type="text"
+                                placeholder="Tìm kiếm theo mã yêu cầu, tên người dùng..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full h-full pl-10 pr-4 bg-gray-100 text-sm border border-gray-300 rounded-sm"
+                            />
                         </div>
 
-                        <div className="flex items-center space-x-3">
-                            <div className="relative">
-                                <select
-                                    className="appearance-none bg-white border border-gray-300 rounded-lg py-2.5 pl-4 pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    value={statusFilter}
-                                    onChange={(e) => setStatusFilter(e.target.value)}
-                                >
-                                    <option value="all">Tất cả trạng thái</option>
-                                    <option value="pending">Chờ xử lý</option>
-                                    <option value="processing">Đang xử lý</option>
-                                    <option value="completed">Hoàn thành</option>
-                                    <option value="rejected">Từ chối</option>
-                                </select>
-                                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                            </div>
-
-                            <button className="flex items-center px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                                <Filter className="w-4 h-4 mr-2" />
-                                Lọc
-                            </button>
+                        {/* Status filter */}
+                        <div className="relative h-10 w-full md:w-48">
+                            <select
+                                value={params.filter.status}
+                                onChange={(e) => updateParams({ filter: { ...params.filter, status: e.target.value } })}
+                                className="w-full h-full bg-gray-100 text-sm pl-4 pr-10 appearance-none border border-gray-300 rounded-sm"
+                            >
+                                <option value="">Tất cả trạng thái</option>
+                                <option value="PENDING">Chờ xử lý</option>
+                                <option value="APPROVAL">Đã duyệt</option>
+                                <option value="IN_TRANSIT">Đang vận chuyển</option>
+                                <option value="RECEIVED">Đã nhận</option>
+                                <option value="COMPLETED">Hoàn thành</option>
+                            </select>
+                            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                         </div>
                     </div>
                 </div>
@@ -304,14 +311,10 @@ const ReturnOrderManagement = () => {
                         <p className="text-sm text-gray-600 mb-4 md:mb-0">
                             Hiển thị {meta.total} trên tổng số {meta.limit} đơn hàng
                         </p>
-                        <PagingBar
-                            pageSize={meta.limit}
-                            totalPages={meta.pageCount}
-                            currentPage={meta.page}
-                            hasNext={meta.hasNext}
-                            hasPrev={meta.hasPrev}
-                            onPageChange={(page) => setParams((prev) => ({ ...prev, page: page }))}
-                        />
+                        <AdvancedPagingBar
+                            meta={meta}
+                            onPageChange={(page) => updateParams({ page: page })}
+                            onLimitChange={(limit) => updateParams({ limit: limit, page: 1 })} />
                     </div>
                 </div>
 

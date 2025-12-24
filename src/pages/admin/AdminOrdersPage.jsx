@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { data, Link } from 'react-router-dom';
+import { data, Link, useSearchParams } from 'react-router-dom';
 import {
     Search,
     Eye,
@@ -23,6 +23,7 @@ import addressApi from '../../api/addressApi';
 import OrderDetailModal from '../../modal/OrderDetailModal';
 import { formatDate, formatCurrency } from '../../app/utils';
 import shippingApi from '../../api/shippingApi';
+import AdvancedPagingBar from '../../components/AdvancedPagingBar';
 
 const AdminOrdersPage = () => {
 
@@ -32,17 +33,39 @@ const AdminOrdersPage = () => {
     const [orders, setOrders] = useState([]);
     const [meta, setMeta] = useState({});
 
+    const [searchParams, setSearchParams] = useSearchParams();
     const [params, setParams] = useState({
-        sort: 'createdAt:desc',
-        q: '',
-        limit: 10,
-        page: 1
+        sort: searchParams.get('sort') || 'createdAt:desc',
+        q: searchParams.get('q') || '',
+        limit: Number(searchParams.get('limit') || 10),
+        page: Number(searchParams.get('page') || 1),
+        filter: {
+            status: searchParams.get('status') || '',
+        }
     });
 
+    const updateParams = (newParams) => {
+        const next = {
+            ...params,
+            ...newParams,
+            filter: {
+                ...params.filter,
+                ...(newParams.filter || {})
+            }
+        };
 
+        setParams(next);
+        const toSet = {
+            ...(next.sort ? { sort: next.sort } : {}),
+            ...(next.q ? { q: next.q } : {}),
+            ...(next.page !== 0 ? { page: next.page } : {}),
+            ...(next.limit !== 0 ? { limit: next.limit } : {}),
+            ...(next.filter.status ? { status: next.filter.status } : {})
+        };
 
-    const [searchQuery, setSearchQuery] = useState('');
-    const [statusFilter, setStatusFilter] = useState('all');
+        setSearchParams(toSet);
+    }
+
     const [paymentFilter, setPaymentFilter] = useState('all');
 
     // State cho modal
@@ -224,39 +247,6 @@ const AdminOrdersPage = () => {
         }
     };
 
-    // Lọc orders dựa trên search và filter
-    const filteredOrders = orders.filter(order => {
-        const matchesSearch =
-            searchQuery === '' ||
-            order.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            order.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            order.user.phone.includes(searchQuery);
-
-        const matchesStatus =
-            statusFilter === 'all' ||
-            order.status === statusFilter;
-
-        const matchesPayment =
-            paymentFilter === 'all' ||
-            order.payment.status === paymentFilter;
-
-        return matchesSearch && matchesStatus && matchesPayment;
-    });
-
-    // Hàm xử lý thay đổi trạng thái đơn hàng
-    const handleStatusChange = (orderId, newStatus) => {
-        setOrders(orders.map(order =>
-            order.id === orderId ? { ...order, status: newStatus } : order
-        ));
-
-        if (selectedOrder && selectedOrder.id === orderId) {
-            setSelectedOrder({ ...selectedOrder, status: newStatus });
-        }
-
-        // Ở đây bạn có thể thêm API call để cập nhật trạng thái
-        console.log(`Cập nhật trạng thái đơn ${orderId} thành ${newStatus}`);
-    };
-
     // Hàm xử lý thanh toán
     const handleMarkAsPaid = (orderId) => {
         setOrders(orders.map(order =>
@@ -286,7 +276,11 @@ const AdminOrdersPage = () => {
 
     const fetchOrders = async () => {
         try {
-            const response = await adminOrderApi.getAllOrders(params);
+            const finalParams = {
+                ...params,
+                filter: JSON.stringify(params.filter)
+            }
+            const response = await adminOrderApi.getAllOrders(finalParams);
             setOrders(response.data);
             setMeta(response.meta);
         } catch (error) {
@@ -309,54 +303,54 @@ const AdminOrdersPage = () => {
                 </div>
                 <div className="container mx-auto p-4 md:p-6">
                     {/* Bộ lọc và tìm kiếm */}
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-6">
-                        <div className="p-6">
-                            <div className="flex flex-col md:flex-row gap-4">
-                                <div className="flex-1 relative">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                                    <input
-                                        placeholder="Tìm kiếm theo mã đơn, tên khách hàng, số điện thoại..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full pl-10 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    />
-                                </div>
+                    <div className="flex flex-col md:flex-row gap-4 bg-white items-center overflow-hidden mb-6">
+                        {/* Search */}
+                        <div className="flex-1 relative h-10">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                            <input
+                                placeholder="Tìm kiếm theo mã đơn, tên khách hàng, số điện thoại..."
+                                value={params.q}
+                                onChange={(e) => updateParams({ q: e.target.value })}
+                                className="w-full h-full pl-10 px-4 bg-gray-100 border border-gray-300 rounded-sm" />
+                        </div>
 
-                                <div className="relative">
-                                    <select
-                                        value={statusFilter}
-                                        onChange={(e) => setStatusFilter(e.target.value)}
-                                        className="w-full md:w-48 border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none pr-10"
-                                    >
-                                        <option value="all">Tất cả trạng thái</option>
-                                        <option value="PROCESSING">Đang xử lý</option>
-                                        <option value="WAIT_FOR_DELIVERY">Chờ giao hàng</option>
-                                        <option value="SHIPPING">Đang giao hàng</option>
-                                        <option value="CANCEL">Đã hủy</option>
-                                    </select>
-                                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-                                </div>
+                        {/* Status filter */}
+                        <div className="relative h-10 w-full md:w-48">
+                            <select
+                                value={params.filter.status}
+                                onChange={(e) =>
+                                    updateParams({
+                                        filter: { ...params.filter, status: e.target.value },
+                                    })
+                                }
+                                className=" w-full h-full px-4 pr-10 bg-gray-100 text-sm border border-gray-300 rounded-sm appearance-none">
+                                <option value="">Tất cả trạng thái</option>
+                                <option value="PROCESSING">Đang xử lý</option>
+                                <option value="WAIT_FOR_DELIVERY">Chờ giao hàng</option>
+                                <option value="SHIPPING">Đang giao hàng</option>
+                                <option value="CANCEL">Đã hủy</option>
+                            </select>
+                            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                        </div>
 
-
-                                <div className="relative">
-                                    <select
-                                        value={paymentFilter}
-                                        onChange={(e) => setPaymentFilter(e.target.value)}
-                                        className="w-full md:w-48 border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none pr-10"
-                                    >
-                                        <option value="all">Tất cả thanh toán</option>
-                                        <option value="PAYING">Đang thanh toán</option>
-                                        <option value="PAID">Đã thanh toán</option>
-                                        <option value="PAYMENT_ERROR">Lỗi thanh toán</option>
-                                        <option value="REFUNDING">Đang hoàn tiền</option>
-                                        <option value="REFUND_ERROR">Lỗi hoàn tiền</option>
-                                        <option value="REFUNDED">Đã hoàn tiền</option>
-                                    </select>
-                                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-                                </div>
-                            </div>
+                        {/* Payment filter */}
+                        <div className="relative h-10 w-full md:w-48">
+                            <select
+                                value={paymentFilter}
+                                onChange={(e) => setPaymentFilter(e.target.value)}
+                                className="w-full h-full px-4 pr-10 bg-gray-100 text-sm border border-gray-300 rounded-sm appearance-none">
+                                <option value="all">Tất cả thanh toán</option>
+                                <option value="PAYING">Đang thanh toán</option>
+                                <option value="PAID">Đã thanh toán</option>
+                                <option value="PAYMENT_ERROR">Lỗi thanh toán</option>
+                                <option value="REFUNDING">Đang hoàn tiền</option>
+                                <option value="REFUND_ERROR">Lỗi hoàn tiền</option>
+                                <option value="REFUNDED">Đã hoàn tiền</option>
+                            </select>
+                            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
                         </div>
                     </div>
+
 
                     {/* Bảng đơn hàng */}
                     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
@@ -374,7 +368,7 @@ const AdminOrdersPage = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {filteredOrders.map((order) => (
+                                    {orders.map((order) => (
                                         <tr key={order.id} className="hover:bg-gray-50 transition-colors">
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div>
@@ -469,16 +463,12 @@ const AdminOrdersPage = () => {
                         {/* Phân trang */}
                         <div className="flex flex-col md:flex-row items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
                             <p className="text-sm text-gray-600 mb-4 md:mb-0">
-                                Hiển thị {filteredOrders.length} trên tổng số {meta.limit} đơn hàng
+                                Hiển thị {orders.length} trên tổng số {meta.limit} đơn hàng
                             </p>
-                            <PagingBar
-                                pageSize={meta.limit}
-                                totalPages={meta.pageCount}
-                                currentPage={meta.page}
-                                hasNext={meta.hasNext}
-                                hasPrev={meta.hasPrev}
-                                onPageChange={(page) => setParams((prev) => ({ ...prev, page: page }))}
-                            />
+                            <AdvancedPagingBar
+                                meta={meta}
+                                onPageChange={(page) => updateParams({ page: page })}
+                                onLimitChange={(limit) => updateParams({ limit: limit, page: 1 })} />
                         </div>
                     </div>
                 </div>

@@ -18,12 +18,14 @@ import {
   Image,
   Calendar
 } from 'lucide-react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { logoutState } from '../stores/authSlice';
 
 const AdminSidebar = () => {
 
   const dispatch = useDispatch();
+
+  const { user } = useSelector(state => state.auth);
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef(null);
@@ -115,14 +117,20 @@ const AdminSidebar = () => {
             onClick={() => setIsProfileOpen(!isProfileOpen)}
             className="flex items-center gap-3 w-full p-2 rounded-lg hover:bg-gray-800 transition-colors group"
           >
-            <img
-              className="h-8 w-8 rounded-full border-2 border-gray-600 group-hover:border-gray-500"
-              src={adminInfo.avatar}
-              alt={adminInfo.name}
-            />
+            <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+              <span className="text-sm font-semibold text-gray-700">
+                {user.fullName
+                  ?.split(" ")
+                  .map(word => word[0])
+                  .slice(0, 2)
+                  .join("")
+                  .toUpperCase()}
+              </span>
+            </div>
+
             <div className="flex-1 min-w-0 text-left">
-              <p className="text-sm font-medium text-white truncate">{adminInfo.name}</p>
-              <p className="text-xs text-gray-400 truncate">{adminInfo.role}</p>
+              <p className="text-sm font-medium text-white truncate">{user.fullName}</p>
+              <p className="text-xs text-gray-400 truncate">{user.role}</p>
             </div>
             <ChevronDown
               className={`h-4 w-4 text-gray-400 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`}
@@ -134,14 +142,20 @@ const AdminSidebar = () => {
             <div className="absolute bottom-full left-0 right-0 mb-2 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-10">
               <div className="p-3 border-b border-gray-700">
                 <div className="flex items-center gap-3">
-                  <img
-                    className="h-10 w-10 rounded-full"
-                    src={adminInfo.avatar}
-                    alt={adminInfo.name}
-                  />
+                  <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                    <span className="text-sm font-semibold text-gray-700">
+                      {user.fullName
+                        ?.split(" ")
+                        .map(word => word[0])
+                        .slice(0, 2)
+                        .join("")
+                        .toUpperCase()}
+                    </span>
+                  </div>
+
                   <div>
-                    <p className="text-sm font-medium text-white">{adminInfo.name}</p>
-                    <p className="text-xs text-gray-400">{adminInfo.email}</p>
+                    <p className="text-sm font-medium text-white">{user.fullName}</p>
+                    <p className="text-xs text-gray-400">{user.email}</p>
                   </div>
                 </div>
               </div>

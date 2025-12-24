@@ -101,7 +101,7 @@ const formatDateOnly = (dateString) => {
 // Hàm rút gọn ID để hiển thị
 const shortenId = (id) => {
     if (!id) return 'N/A';
-    return id.substring(0, 20) + '...';
+    return id.substring(0, 15) + '...';
 };
 
 const utils = {
