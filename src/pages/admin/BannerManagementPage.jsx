@@ -316,7 +316,7 @@ const BannerManagementPage = () => {
 
                 {/* Banners Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredBanners.map(banner => (
+                    {filteredBanners.length > 0 && filteredBanners.map(banner => (
                         <div key={banner.id} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
                             <div className="relative aspect-video bg-gray-200">
                                 <img
