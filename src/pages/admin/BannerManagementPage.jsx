@@ -320,7 +320,7 @@ const BannerManagementPage = () => {
                         <div key={banner.id} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
                             <div className="relative aspect-video bg-gray-200">
                                 <img
-                                    src={banner.imageUrl.replace('http://minio:9000', 'http://localhost:9000')}
+                                    src={banner.imageUrl?.replace('http://minio:9000', 'http://localhost:9000')}
                                     alt={banner.title}
                                     className="w-full h-full object-cover"
                                     onError={(e) => {
