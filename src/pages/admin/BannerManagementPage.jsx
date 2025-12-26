@@ -245,7 +245,7 @@ const BannerManagementPage = () => {
     const fetchBanners = async () => {
         try {
             const response = await bannerApi.getAll(searchParams);
-            setBanners(response.data);
+            setBanners(response.data || []);
         } catch (error) {
             console.error('Error fetching banners:', error);
             toast.error('Đã có lỗi xảy ra khi tải danh sách banner');
