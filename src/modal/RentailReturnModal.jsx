@@ -210,7 +210,7 @@ const RentailReturnModal = ({
                                                         <div className="space-y-1">
                                                             {penaltyFee > 0 && (
                                                                 <div className="text-sm">
-                                                                    <span className="text-gray-600">Phí phạt: </span>
+                                                                    <span className="text-gray-600">Phí phạt quá hạn: </span>
                                                                     <span className="font-semibold text-red-600">
                                                                         {formatCurrency(penaltyFee)}
                                                                     </span>
@@ -343,7 +343,7 @@ const RentailReturnModal = ({
                                 </h4>
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="block text-xs text-gray-500 mb-2">Ghi chú từ người dùng</label>
+                                        <label className="block text-xs text-gray-500 mb-2">Ghi chú từ khách hàng</label>
                                         <div className="bg-gray-50 p-3 rounded-lg">
                                             <p className="text-gray-700 text-sm">{selectedOrder.customerNote || 'Không có ghi chú'}</p>
                                         </div>
@@ -379,19 +379,19 @@ const RentailReturnModal = ({
                                     <div className="flex justify-between">
                                         <span className="text-gray-600">Phí phạt trả sách muộn:</span>
                                         <span className="font-semibold text-red-600">
-                                            {formatCurrency(selectedOrder.overdueFee)}
+                                            {formatCurrency(selectedOrder.overdueFee || 0)}
                                         </span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-gray-600">Tổng phí phạt:</span>
                                         <span className="font-semibold text-red-600">
-                                            {formatCurrency(selectedOrder.totalPenalty)}
+                                            {formatCurrency(selectedOrder.totalPenalty || 0)}
                                         </span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-gray-600">Tổng tiền hoàn:</span>
                                         <span className="font-semibold text-green-600">
-                                            {formatCurrency(selectedOrder.refundAmount)}
+                                            {formatCurrency(selectedOrder.refundAmount || 0)}
                                         </span>
                                     </div>
                                     <div className={`pt-3 border-t border-blue-200 ${selectedOrder.status === 'COMPLETED' ? 'hidden' : ''}`}>

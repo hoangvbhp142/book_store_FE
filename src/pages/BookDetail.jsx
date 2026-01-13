@@ -347,9 +347,9 @@ const BookDetail = () => {
                 {[
                   {
                     icon: <Truck className="h-4 w-4 text-blue-600" />,
-                    title: 'Miễn phí vận chuyển',
-                    desc: 'Cho đơn hàng từ $50',
-                    color: 'bg-blue-100',
+                    title: 'Vận chuyển toàn quốc',
+                    desc: 'Phí ship tính theo khu vực',
+                    color: 'bg-gray-100',
                   },
                   {
                     icon: <Clock className="h-4 w-4 text-green-600" />,
@@ -385,12 +385,12 @@ const BookDetail = () => {
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
                 <div className="flex items-center gap-2">
                   <StarRating rating={ratingStats.averageRating} />
-                  <span className="font-medium text-gray-700">{ratingStats.averageRating}</span>
+                  {/* <span className="font-medium text-gray-700">{ratingStats.averageRating}</span> */}
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-500">
                   <span>({ratingStats.totalReviews} đánh giá)</span>
-                  <span>|</span>
-                  <span>Đã bán: 605</span>
+                  {/* <span>|</span>
+                  <span>Đã bán: 605</span> */}
                 </div>
               </div>
 
@@ -402,7 +402,7 @@ const BookDetail = () => {
                 </div>
                 <div className="space-y-2">
                   <p><span className="font-medium">Tác giả:</span> {getAuthorNames()}</p>
-                  <p><span className="font-medium">Hình thức bìa:</span> {selectedBook.status}</p>
+                  {/* <p><span className="font-medium">Hình thức bìa:</span> {selectedBook.status}</p> */}
                 </div>
               </div>
 

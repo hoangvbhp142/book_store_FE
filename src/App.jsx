@@ -148,7 +148,7 @@ function LayoutWrapper({ children }) {
 
   return (
     <>
-      <AnnouncementPopup />
+      {/* <AnnouncementPopup /> */}
       {!isHideLayout && <Header />}
       {children}
       {!isHideLayout && <Footer />}

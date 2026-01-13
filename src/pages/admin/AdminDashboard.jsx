@@ -17,6 +17,9 @@ import {
 } from "lucide-react";
 import analysisApi from '../../api/analysisApi'; // Điều chỉnh đường dẫn cho đúng
 
+
+const currentYear = new Date().getFullYear();
+
 const AdminDashboard = () => {
     const [loading, setLoading] = useState({
         stats: true,
@@ -25,6 +28,9 @@ const AdminDashboard = () => {
     });
     const [error, setError] = useState(null);
 
+    const [selectedYear, setSelectedYear] = useState(currentYear);
+
+
     // State cho dữ liệu
     const [stats, setStats] = useState([]);
     const [revenueData, setRevenueData] = useState([]);
@@ -32,11 +38,17 @@ const AdminDashboard = () => {
     const [topPurchase, setTopPurchase] = useState([]);
     const [topRental, setTopRental] = useState([]);
 
+    console.log(selectedYear);
+    
+
     // Fetch tất cả dữ liệu
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
                 setError(null);
+                const params = {
+                    year: selectedYear
+                };
 
                 // Fetch dữ liệu song song
                 const [
@@ -51,7 +63,7 @@ const AdminDashboard = () => {
                     analysisApi.getUserNumber(),
                     analysisApi.getBookNumber(),
                     analysisApi.getOrderNumber(),
-                    analysisApi.getRevenue(),
+                    analysisApi.getRevenue(params),
                     analysisApi.getTopPurchase(),
                     analysisApi.getTopRental(),
                     analysisApi.getTopBook()
@@ -155,7 +167,7 @@ const AdminDashboard = () => {
         // Refresh data mỗi 5 phút
         const interval = setInterval(fetchDashboardData, 5 * 60 * 1000);
         return () => clearInterval(interval);
-    }, []);
+    }, [selectedYear]);
 
     // Format số tiền
     const formatCurrency = (amount) => {
@@ -363,9 +375,21 @@ const AdminDashboard = () => {
                 <div className="bg-white border border-gray-300 rounded-2xl shadow-sm p-6">
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-lg font-semibold">Biểu đồ doanh thu theo tháng</h2>
-                        <div className="text-sm text-gray-500">
-                            Năm {new Date().getFullYear()}
-                        </div>
+                        <select
+                            className="text-sm text-gray-500 border border-gray-300 rounded px-2 py-1 focus:outline-none"
+                            value={selectedYear}
+                            onChange={(e) => setSelectedYear(Number(e.target.value))}
+                        >
+                            {Array.from({ length: 5 }, (_, i) => {
+                                const year = new Date().getFullYear() - i;
+                                return (
+                                    <option key={year} value={year}>
+                                        Năm {year}
+                                    </option>
+                                );
+                            })}
+                        </select>
+
                     </div>
                     {loading.revenue ? (
                         <div className="h-64 flex items-center justify-center">
@@ -443,7 +467,7 @@ const AdminDashboard = () => {
             </div>
 
             {/* === Biểu đồ người dùng === */}
-            <div className="bg-white border border-gray-300 rounded-2xl shadow-sm p-6">
+            {/* <div className="bg-white border border-gray-300 rounded-2xl shadow-sm p-6">
                 <h2 className="text-lg font-semibold mb-4">Tỉ lệ người dùng</h2>
                 <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
@@ -470,7 +494,7 @@ const AdminDashboard = () => {
                         <Legend />
                     </PieChart>
                 </ResponsiveContainer>
-            </div>
+            </div> */}
 
             {/* === 3 Bảng Top: Phổ biến, Mua, Thuê === */}
             <div className="grid grid-cols-1 gap-6">

@@ -106,6 +106,7 @@ const ReturnOrderManagement = () => {
         try {
             const response = await adminRentalApi.approveReturn(requestId, data);
             toast.success('Yêu cầu trả sách đã được hoàn tất thành công.');
+            setShowModal(false);
         } catch (error) {
             console.log(error);
             toast.error(error?.response?.data?.message || 'Đã có lỗi xảy ra khi hoàn tất yêu cầu trả sách.');

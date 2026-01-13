@@ -38,7 +38,7 @@ const PaymentSuccessPage = () => {
     };
 
     const handleViewOrder = () => {
-        navigate('/orders');
+        navigate('/customer/orders');
     };
 
     return (

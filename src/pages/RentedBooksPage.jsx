@@ -29,7 +29,7 @@ const RentedBooksPage = () => {
             APPROVAL: {
                 color: 'bg-purple-100 text-purple-800 border border-purple-200',
                 icon: <ShieldCheck className="w-4 h-4" />,
-                text: 'Chờ duyệt',
+                text: 'Đã duyệt',
                 bgColor: 'bg-purple-50'
             },
             IN_TRANSIT: {
@@ -123,7 +123,7 @@ const RentedBooksPage = () => {
 
     const fetchRentalReturns = async () => {
         try {
-            const response = await rentalReturnApi.getAll({});
+            const response = await rentalReturnApi.getAll(params);
             console.log(response);
             setRentalRequests(response.data);
             setMeta(response.meta);
@@ -135,10 +135,7 @@ const RentedBooksPage = () => {
 
     useEffect(() => {
         fetchRentalReturns();
-    }, []);
-
-    console.log(selectedOrder);
-
+    }, [selectedOrder]);
 
     return (
         <main className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 text-gray-900">

@@ -498,7 +498,7 @@ const OrderDetailModal = ({
                                         </div>
                                     </div>
 
-                                    <div>
+                                    {/* <div>
                                         <label className="block text-xs text-gray-500 mb-2">Cập nhật trạng thái</label>
                                         <select
                                             className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm"
@@ -514,7 +514,7 @@ const OrderDetailModal = ({
                                             <option value="REFUNDED">Đã hoàn tiền</option>
                                             <option value="CANCEL">Đã hủy</option>
                                         </select>
-                                    </div>
+                                    </div> */}
                                 </div>
                             </div>
 

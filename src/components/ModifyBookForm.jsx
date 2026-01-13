@@ -705,7 +705,7 @@ const ModifyBookForm = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="flex flex-col">
                                 <label className="font-medium text-gray-700 mb-2">
-                                    Giá thuê/ngày (VND)
+                                    Giá thuê/7 ngày (VND)
                                 </label>
                                 <input
                                     type="text"
@@ -736,7 +736,7 @@ const ModifyBookForm = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="flex flex-col">
                                 <label className="font-medium text-gray-700 mb-2">
-                                    Giá thuê/tuần (VND)
+                                    Giá thuê/14 ngày (VND)
                                 </label>
                                 <input
                                     type="text"
@@ -767,7 +767,7 @@ const ModifyBookForm = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="flex flex-col">
                                 <label className="font-medium text-gray-700 mb-2">
-                                    Giá thuê/tháng (VND) <span className="text-red-500">*</span>
+                                    Giá thuê/30 ngày (VND) <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="text"
